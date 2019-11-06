@@ -10,9 +10,131 @@
 </ion-header>
 
 <ion-content>
-  <ion-list lines="none">
-    <ion-item>
-      Credit
-    </ion-item>
-  </ion-list>
+  <ion-grid>
+    <ion-row>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Id cliente:</ion-label>
+          <ion-input [(ngModel)]="in.IDCliente" (ngModelChange)='GetClient()'></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Nombre:</ion-label>
+          {{ cliente[gv.nombre] }}
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Efectivo: $</ion-label>
+          <ion-input [(ngModel)]="in.Efectivo"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Numero de pagos:</ion-label>
+          <ion-input [(ngModel)]="in.Num_Pagos" (ngModelChange)='CambioPagoNum(in.Pago, in.Num_Pagos)'>
+          </ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Credito: $</ion-label>
+          <ion-input [(ngModel)]="in.Credito"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Pago: $</ion-label>
+          <ion-input [(ngModel)]="in.Pago" (ngModelChange)='CambioPagoNum(in.Pago, in.Num_Pagos)'></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Total a pagar: $</ion-label>
+          <ion-textarea disabled readonly [(ngModel)]="in.Total_Credito">
+          </ion-textarea>
+
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-6>
+        <ion-item>
+          <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Fecha primer pago" max="2050" [(ngModel)]="in.Fecha">
+          </ion-datetime>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-label>Hora de pago</ion-label>
+          <ion-datetime displayFormat="H:mm A" minuteValues="0,30" [(ngModel)]="in.Horario"></ion-datetime>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-select placeholder="Periodo" [(ngModel)]="in.Periodo">
+            <ion-select-option value="{{ gv.diario }}">Diario</ion-select-option>
+            <ion-select-option value="{{ gv.semanal }}">Semanal</ion-select-option>
+            <ion-select-option value="{{ gv.quincenal }}">Quincenal</ion-select-option>
+            <ion-select-option value="{{ gv.mensual }}">Mensual</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col>
+        <ion-item>
+          <ion-select placeholder="Deposito" [(ngModel)]="in.Deposito">
+            <ion-select-option value="{{ gv.representante }}">Representante</ion-select-option>
+            <ion-select-option value="{{ gv.oficina }}">Oficina</ion-select-option>
+            <ion-select-option value="{{ gv.banco }}">Banco</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <h3>Garantias</h3>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-4>
+        <ion-item class="input">
+          <ion-input placeholder="Articulo">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-4>
+        <ion-item class="input">
+          <ion-input placeholder="Marca">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-4>
+        <ion-item class="input">
+          <ion-input placeholder="Identificador">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <ion-button [disabled]="Btn_Desactivado" (click)="Pay()">Agregar credito</ion-button>
+      </ion-col>
+      <ion-col *ngIf="Alerta">
+        <ion-text>{{ AlertMsj }}</ion-text>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
 </ion-content>

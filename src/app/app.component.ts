@@ -17,23 +17,28 @@ export class AppComponent {
       icon: "home"
     },
     {
-      title: "Clients",
+      title: "Clientes",
       url: "/clients",
       icon: "list"
     },
     {
-      title: "Credit",
+      title: "Agregar credito",
       url: "/credit",
       icon: "list"
     },
     {
-      title: "Cut",
+      title: "Corte",
       url: "/cut",
       icon: "list"
     },
     {
-      title: "Pending",
+      title: "Pendientes",
       url: "/pending",
+      icon: "list"
+    },
+    {
+      title: "Administrador",
+      url: "/admin",
       icon: "list"
     }
   ];

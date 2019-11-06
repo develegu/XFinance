@@ -18,6 +18,11 @@ const routes: Routes = [
       import("./pages/clients/clients.module").then(m => m.ClientsModule)
   },
   {
+    path: "admin",
+    loadChildren: () =>
+      import("./pages/admin/admin.module").then(m => m.adminModule)
+  },
+  {
     path: "credit",
     loadChildren: () =>
       import("./pages/credit/credit.module").then(m => m.CreditModule)

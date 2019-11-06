@@ -10,10 +10,13 @@ import { AngularFireAuthModule } from "@angular/fire/auth";
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app.routing.module';
 import { AngularFireModule } from '@angular/fire';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
 import { SharedModule } from './common/modules/shared.module';
 import { CommonService } from './common/services/common.service';
 import { AuthManagerService } from './common/services/auth-manager.service';
+import { IonicStorageModule } from '@ionic/storage';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [AppComponent],
@@ -23,8 +26,11 @@ import { AuthManagerService } from './common/services/auth-manager.service';
     SharedModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
+    AngularFirestoreModule,
     IonicModule.forRoot(),
-    AppRoutingModule
+    IonicStorageModule.forRoot(),
+    AppRoutingModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
     CommonService,

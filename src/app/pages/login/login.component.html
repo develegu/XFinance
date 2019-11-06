@@ -16,4 +16,19 @@
       <ion-label>Open Modal</ion-label>
     </ion-item>
   </ion-list>
+
+  <ion-col>
+    <ion-input placeholder="Mail" [(ngModel)]="login.mail">
+    </ion-input>
+  </ion-col>
+
+  <ion-col>
+    <ion-input placeholder="Contraseña" [(ngModel)]="login.contrasena">
+    </ion-input>
+  </ion-col>
+
+  <ion-button (click)="Login()">Atras
+  </ion-button>
+
+
 </ion-content>

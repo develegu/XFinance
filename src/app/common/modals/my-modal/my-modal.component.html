@@ -1,21 +1,173 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>
-      My modal
-    </ion-title>
-
-    <ion-buttons slot="primary">
-      <ion-button (click)="dismiss()" fill="outline">
-        Close
-      </ion-button>
-    </ion-buttons>
+    <ion-title>{{ type }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-list lines="none">
-    <ion-item>
-      <ion-label>My Modal</ion-label>
-    </ion-item>
-  </ion-list>
+
+  <ion-grid *ngIf="type === 'Cliente'">
+    <div *ngIf="Cliente.Paso === 1">
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Nombre(s)" [(ngModel)]="Cliente.Nombre">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Apellido paterno" [(ngModel)]="Cliente.ApellidoP">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Apellido materno" [(ngModel)]="Cliente.ApellidoM">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-label>Seleccionar</ion-label>
+            <ion-select [(ngModel)]="Cliente.Sexo" placeholder="Sexo">
+              <ion-select-option value="{{ gv.Hombre }}">Hombre</ion-select-option>
+              <ion-select-option value="{{ gv.Mujer }}">Mujer</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Identificador" [(ngModel)]="Cliente.Identificador">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Edo nacimiento" [(ngModel)]="Cliente.Edo_Nacimiento">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <h3>Direccion</h3>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Calle" [(ngModel)]="Cliente.Calle">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Interior" [(ngModel)]="Cliente.NumeroExt">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Exterior" [(ngModel)]="Cliente.NumeroInt">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="CP" [(ngModel)]="Cliente.CP">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Colonia" [(ngModel)]="Cliente.Colonia">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Municipio" [(ngModel)]="Cliente.Municipio">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Estado" [(ngModel)]="Cliente.Estado">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Sector" [(ngModel)]="Cliente.Sector">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="CURP" [(ngModel)]="Cliente.CURP">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Telefono" [(ngModel)]="Cliente.Telefono">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-item>
+            <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Fecha Nacimiento" max="2050"
+              [(ngModel)]="Cliente.Cumpleanos">
+            </ion-datetime>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <div *ngIf="Cliente.Paso === 2">
+
+      <ion-item>
+        <ion-label>Aval</ion-label>
+      </ion-item>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Nombre(s)" [(ngModel)]="Cliente.Aval.Nombre">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Apellido paterno" [(ngModel)]="Cliente.Aval.ApellidoP">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Apellido materno" [(ngModel)]="Cliente.Aval.ApellidoM">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Calle" [(ngModel)]="Cliente.Aval.Calle">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="Numero" [(ngModel)]="Cliente.Aval.Numero">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="CP" [(ngModel)]="Cliente.Aval.Colonia">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Telefono" [(ngModel)]="Cliente.Aval.Telefono">
+          </ion-input>
+        </ion-col>
+        <ion-col>
+          <ion-input placeholder="CURP" [(ngModel)]="Cliente.Aval.CURP">
+          </ion-input>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <ion-row>
+      <ion-col *ngIf="Cliente.Paso === 2">
+        <ion-button [disabled]="btn_disabled" (click)="Cliente.Paso = 1" (click)="Txt_Btn_Cliente = 'Siguiente'">Atras
+        </ion-button>
+      </ion-col>
+      <ion-col>
+        <ion-button [disabled]="btn_disabled" (click)="AgregarClientes()">{{ Txt_Btn_Cliente }}</ion-button>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+  
+  <ion-row *ngIf='Incomplete'>
+    <ion-col>
+      <ion-text>{{ AlertText }}</ion-text>
+    </ion-col>
+  </ion-row>
 </ion-content>
