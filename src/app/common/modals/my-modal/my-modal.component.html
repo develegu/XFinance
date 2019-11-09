@@ -26,8 +26,8 @@
       <ion-row>
         <ion-col>
           <ion-item>
-            <ion-label>Seleccionar</ion-label>
-            <ion-select [(ngModel)]="Cliente.Sexo" placeholder="Sexo">
+            <ion-label>Sexo</ion-label>
+            <ion-select [(ngModel)]="Cliente.Sexo">
               <ion-select-option value="{{ gv.Hombre }}">Hombre</ion-select-option>
               <ion-select-option value="{{ gv.Mujer }}">Mujer</ion-select-option>
             </ion-select>
@@ -161,13 +161,176 @@
       <ion-col>
         <ion-button [disabled]="btn_disabled" (click)="AgregarClientes()">{{ Txt_Btn_Cliente }}</ion-button>
       </ion-col>
+
+      <ion-col *ngIf='Incomplete'>
+        <ion-text>{{ AlertText }}</ion-text>
+      </ion-col>
     </ion-row>
 
   </ion-grid>
-  
-  <ion-row *ngIf='Incomplete'>
-    <ion-col>
-      <ion-text>{{ AlertText }}</ion-text>
-    </ion-col>
-  </ion-row>
+
+  <ion-grid *ngIf="type === 'Usuario'">
+
+    <ion-row>
+      <ion-col>
+        <ion-input placeholder="Nombre" [(ngModel)]="Usuario.Nombre">
+        </ion-input>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <ion-input placeholder="Mail" [(ngModel)]="Usuario.Mail">
+        </ion-input>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-item>
+        <ion-label>Seleccionar</ion-label>
+        <ion-select [(ngModel)]="Usuario.Roll" placeholder="Roll">
+          <ion-select-option value="{{ gv.Administrador }}">Administrador</ion-select-option>
+          <ion-select-option value="{{ gv.Cobrador }}">Cobrador</ion-select-option>
+          <ion-select-option value="{{ gv.Oficina }}">Oficina</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-col>
+        <ion-input disabled readonly placeholder="Organizacion" [(ngModel)]="Usuario.Organizacion">
+        </ion-input>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <ion-input type="password" placeholder="Contraseña" [(ngModel)]="Usuario.Contrasena">
+        </ion-input>
+      </ion-col>
+      <ion-col>
+        <ion-input type="password" placeholder="Confirmar contraseña" [(ngModel)]="Usuario.Confirmar">
+        </ion-input>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <ion-button [disabled]="btn_disabled" (click)="AgregarUsuario()">Agregar</ion-button>
+      </ion-col>
+      <ion-col *ngIf='Incomplete'>
+        <ion-text>{{ AlertText }}</ion-text>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+
+  <ion-grid *ngIf="type === 'Pago'">
+
+    <ion-item>
+      <ion-label>Seleccionar</ion-label>
+      <ion-select interface="action-sheet" [(ngModel)]="Selection" placeholder="Pagado" (ngModelChange)='Cambio()'>
+        <ion-select-option value="Posponer">Posponer</ion-select-option>
+        <ion-select-option value="Liquidar">Liquidar</ion-select-option>
+        <ion-select-option value="Re estructurar">Re estructurar</ion-select-option>
+        <ion-select-option value="Agregar pagos">Pagos de penalizacion</ion-select-option>
+        <ion-select-option value="Eliminar credito">Eliminar credito</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <div *ngIf="Selection === 'Posponer'">
+      <ion-text>
+        Ingresa la fecha a la que se pospondra el pago y la razon de posponerlo.
+      </ion-text>
+
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-label>FECHA</ion-label>
+            <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Select Date" max="2050"
+              [(ngModel)]="In.Posponer.Date"></ion-datetime>
+          </ion-item>
+        </ion-col>
+
+        <ion-col>
+          <ion-item>
+            <ion-label>Hora de pago</ion-label>
+            <ion-datetime displayFormat="H:mm A" minuteValues="0,30" [(ngModel)]="In.Posponer.Date"></ion-datetime>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-input placeholder="Razon" [(ngModel)]="In.Posponer.Razon"></ion-input>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <div *ngIf="Selection === 'Liquidar'">
+      <ion-text>
+        ¿Seguro que quieres liquidar el credito completo?
+        Faltan {{ Info_Credito[gv.pagos_faltantes] }} pagos con un total de $
+        {{ Info_Credito[gv.cantidad_por_pagar] }}
+      </ion-text>
+      <ion-row>
+        <ion-col>
+          <ion-input type="number" placeholder="Cantidad a reducir" [(ngModel)]="In.Liquidar.Cantidad"></ion-input>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <div *ngIf="Selection === 'Re estructurar'">
+      <ion-text>
+        Ingresa la nueva cantidad a pagar.
+        Fecha de inicio de los pagos.
+        Y el periodo de los pagos
+      </ion-text>
+
+      <ion-row>
+        <ion-col>
+          <ion-input type="number" placeholder="Pago" [(ngModel)]="In.Re_Estructurar.Pago"></ion-input>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-label>FECHA</ion-label>
+            <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Select Date" max="2050"
+              [(ngModel)]="In.Re_Estructurar.Date"></ion-datetime>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-item>
+        <ion-select placeholder="Tipo" [(ngModel)]="In.Re_Estructurar.Period">
+          <ion-select-option value="{{ gv.diario }}">Diario</ion-select-option>
+          <ion-select-option value="{{ gv.semanal }}">Semanal</ion-select-option>
+          <ion-select-option value="{{ gv.quincenal }}">Quincenal</ion-select-option>
+          <ion-select-option value="{{ gv.mensual }}">Mensual</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+
+    <div *ngIf="Selection === 'Agregar pagos'">
+      <ion-text>
+        Ingresa la cantidad de pagos que se le agregaran al credito
+      </ion-text>
+
+      <ion-row>
+        <ion-col>
+          <ion-input type="number" placeholder="Pago" [(ngModel)]="In.Agregar_pagos.Pagos"></ion-input>
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <ion-row>
+      <ion-col>
+        <ion-button [disabled]="btn_disabled" (click)="PayCredit()">{{ Btn_Txt }}</ion-button>
+      </ion-col>
+      <ion-col *ngIf="Incomplete">
+        <ion-text>{{ AlertText }}</ion-text>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
 </ion-content>

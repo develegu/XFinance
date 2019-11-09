@@ -30,19 +30,19 @@
 
       <ion-row style="justify-content: center; background-color: #efefef;">
         <ion-col>
-          {{ client[gv.nombre] }}
+          {{ this.gf.QuitarBarraAInfo(client[gv.nombre]) }}
         </ion-col>
         <ion-col>
-          {{ client[gv.aval][gv.nombre] }}
+          {{ this.gf.QuitarBarraAInfo(client[gv.aval][gv.nombre]) }}
         </ion-col>
       </ion-row>
 
       <ion-row style="justify-content: center; background-color: #efefef;">
         <ion-col>
-          {{ client[gv.direccion] }}
+          {{ this.gf.QuitarBarraAInfo(client[gv.direccion]) }}
         </ion-col>
         <ion-col>
-          {{ client[gv.aval][gv.direccion] }}
+          {{ this.gf.QuitarBarraAInfo(client[gv.aval][gv.direccion]) }}
         </ion-col>
       </ion-row>
 
@@ -57,56 +57,84 @@
 
       <h4>Creditos</h4>
 
-      <ion-row *ngFor="let pago of pagos_cliente">
+      <ion-row *ngFor="let info of ArrInfo | keyvalue">
+        <ion-radio mode="md" *ngIf="Selected === info.key" checked></ion-radio>
+        <ion-radio mode="md" *ngIf="Selected !== info.key" (ionSelect)="Selected = info.key"></ion-radio>
+
         <ion-row>
           <ion-col>
-            {{ pago[gv.nombre] }}
+            Total pagado: {{ info.value[gv.cantidad_pagado] }}
           </ion-col>
           <ion-col>
-            {{ pago[gv.num_pago] }}
+            Pagos faltantes: {{ info.value[gv.pagos_faltantes] }}
           </ion-col>
           <ion-col>
-            {{ pago[gv.pago] }}
+            Proximos: {{ info.value[gv.status_proximo] }}
           </ion-col>
           <ion-col>
-            {{ pago[gv.multa] }}
+            Pago faltante: {{ info.value[gv.cantidad_por_pagar] }}
           </ion-col>
           <ion-col>
-              {{ pago[gv.status] }}
-            </ion-col>
+            Pago vencido: {{ info.value[gv.status_vencido] }}
+          </ion-col>
+        </ion-row>
+
+        <ion-row *ngIf="ArrCreditos[this.Selected + gv.info] !== undefined">
+          <ion-col>
+            <h4>Siguiente pago</h4>
+          </ion-col>
+          <ion-col>
+            Numero de pago: {{ ArrCreditos[this.Selected + gv.info][1][0][gv.num_pago] }}
+          </ion-col>
+          <ion-col>
+            Cantidad: {{ ArrCreditos[this.Selected + gv.info][1][0][gv.pago] }}
+          </ion-col>
+          <ion-col>
+            Fecha: {{ ArrCreditos[this.Selected + gv.info][1][0][gv.fecha] }}
+          </ion-col>
+        </ion-row>
+
+        <ion-row *ngIf="Selected === info.key">
+          <ion-col size="1" style="margin-right: 30px;">
+            <ion-item>
+              <ion-textarea [(ngModel)]="Pago" placeholder="Pago" (ngModelChange)='CambioPagoMulta(Pago, Multa)'>
+              </ion-textarea>
+            </ion-item>
+          </ion-col>
+
+          <ion-col size="1" style="margin-left: 30px; margin-right: 30px;">
+            <ion-item>
+              <ion-textarea [(ngModel)]="Multa" placeholder="Multa" (ngModelChange)='CambioPagoMulta(Pago, Multa)'>
+              </ion-textarea>
+            </ion-item>
+          </ion-col>
+
+          <ion-col size="1" style="margin-left: 30px;">
+            <ion-item>
+              <ion-textarea disabled readonly [(ngModel)]="Pago_Total" placeholder="Total">
+              </ion-textarea>
+            </ion-item>
+          </ion-col>
+
+          <ion-col size="1" style="margin-left: 30px;">
+            <ion-button [disabled]="Btn_Desactivado" (click)="Pay()">Pagar</ion-button>
+          </ion-col>
+
+          <ion-col size="1" style="margin-left: 30px;">
+            <ion-button (click)="OpcionesDeCreditoModal()">Opciones de credito</ion-button>
+          </ion-col>
+          <ion-col *ngIf='Incomplete'>
+            <ion-text>{{ AlertText }}</ion-text>
+          </ion-col>
         </ion-row>
       </ion-row>
 
-      <ion-row>
-        <ion-col size="1" style="margin-right: 30px;">
-          <ion-item>
-            <ion-textarea [(ngModel)]="Pago" placeholder="Pago" (ngModelChange)='CambioPagoMulta(Pago, Multa)'>
-            </ion-textarea>
-          </ion-item>
-        </ion-col>
-
-        <ion-col size="1" style="margin-left: 30px; margin-right: 30px;">
-          <ion-item>
-            <ion-textarea [(ngModel)]="Multa" placeholder="Multa" (ngModelChange)='CambioPagoMulta(Pago, Multa)'>
-            </ion-textarea>
-          </ion-item>
-        </ion-col>
-
-        <ion-col size="1" style="margin-left: 30px;">
-          <ion-item>
-            <ion-textarea disabled readonly [(ngModel)]="Pago_Total" placeholder="Total">
-            </ion-textarea>
-          </ion-item>
-        </ion-col>
-
-        <ion-col size="1" style="margin-left: 30px;">
-          <ion-item>
-            <ion-button [disabled]="Btn_Desactivado" (click)="Pay()">Pagar</ion-button>
-          </ion-item>
-        </ion-col>
-      </ion-row>
-
     </div>
+
+    <ion-col size="2" style="margin-left: 800px; position: absolute;">
+      <ion-icon color="medium" name="close-circle-outline" (click)="ModificarClienteModal()">
+      </ion-icon>
+    </ion-col>
 
   </ion-row>
 

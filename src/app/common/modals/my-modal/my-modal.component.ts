@@ -11,13 +11,11 @@ import { gv } from '../../constants';
 })
 
 export class MyModal {
-
   public gv = gv;
-
   @Input() myParam: string;
 
   dismiss() {
- 
+
     this.modalCtrl.dismiss({
       'dismissed': true
     });
@@ -29,32 +27,115 @@ export class MyModal {
     public gf: CommonService,
   ) {
   }
-  
-  Selection = 'Pagado';
-  Btn_Txt = 'Pagar';
-  TextCredit = 'Se registrara tu siguiente pago';
-  Incomplete = false;
+
   AlertText = '';
   btn_disabled = false;
 
-  NextPayment;
-  FirstPayment;
-  LastPayment;
-  NextPayments = [];
-  Sorted_Payments = [];
-  week_num;
-  client_num;
-  Credit_Info = [];
   type;
+  Tipo;
+
+  ngOnInit() {
+    if (this.type === 'Usuario') {
+      this.Usuario.Organizacion = gv.usuario[gv.organizacion];
+
+      if (this.Tipo === gv.Actualizar) {
+        this.Usuario.Mail = this.Mod_Usuario[gv.mail]
+        this.Usuario.Nombre = this.Mod_Usuario[gv.nombre]
+        this.Usuario.Roll = this.Mod_Usuario[gv.roll]
+      }
+
+    } else {
+
+    }
+
+    if (this.type === 'Cliente' && this.Tipo === gv.Actualizar) {
+      console.log(this.Info_Cliente)
+      let ArrNombre = this.Info_Cliente[gv.nombre].split('_');
+      console.log(ArrNombre);
+      this.Cliente.Nombre = ArrNombre[0];
+      this.Cliente.ApellidoP = ArrNombre[1];
+      this.Cliente.ApellidoM = ArrNombre[2];
+
+      let ArrDireccion = this.Info_Cliente[gv.direccion].split('_');
+      console.log(ArrDireccion);
+      this.Cliente.Calle = ArrDireccion[0];
+      this.Cliente.NumeroInt = ArrDireccion[1];
+      this.Cliente.NumeroExt = ArrDireccion[2];
+      this.Cliente.Colonia = ArrDireccion[3];
+      this.Cliente.Municipio = ArrDireccion[4];
+      this.Cliente.Estado = ArrDireccion[5];
+      this.Cliente.CP = ArrDireccion[6];
+
+      this.Cliente.Sexo = this.Info_Cliente[gv.sexo];
+      this.Cliente.Identificador = this.Info_Cliente[gv.identificador];
+      this.Cliente.Cumpleanos = this.Info_Cliente[gv.fecha];
+      this.Cliente.Telefono = this.Info_Cliente[gv.telefono];
+      this.Cliente.CURP = this.Info_Cliente[gv.curp];
+
+    }
+
+    if (this.type === 'Pago') {
+
+      this.PagosArr = gv.pagos_Arr.filter(pago => {
+        return pago[gv.key_primer_pago] === this.Key_Primer_Pago;
+      });
+      this.PagosArr.sort((a, b) => { return a[gv.num_pago] - b[gv.num_pago] });
+
+      this.ProximosArr = this.PagosArr.filter(pago => {
+        return pago[gv.status] === gv.status_proximo ||
+          pago[gv.status] === gv.status_vencido;
+      });
+      this.ProximosArr.sort((a, b) => { return a[gv.num_pago] - b[gv.num_pago] });
+
+      this.Info_Credito = this.gf.GetInformacionCreditoInd(this.PagosArr);
+      console.log(this.Info_Credito)
+
+      console.log(this.PagosArr);
+      console.log(this.ProximosArr);
+
+    }
+  }
+
+  closeModal() {
+    // using the injected ModalController this page
+    // can "dismiss" itself and optionally pass back data
+
+    this.modalCtrl.dismiss({
+      'dismissed': true
+    });
+  }
+
+  //USUARIO
+  Mod_Usuario;
 
   Usuario = {
     Nombre: '',
     Mail: '',
     Contrasena: '',
     Confirmar: '',
-    Roll: ''
+    Roll: '',
+    Organizacion: ''
   }
 
+  AgregarUsuario() {
+    if (this.Usuario.Mail === '') {
+      this.Incomplete = true;
+      this.AlertText = 'Falta el mail'
+      return;
+    }
+
+    this.gf.CrearCollaborador(this.Usuario.Nombre, this.Usuario.Roll,
+      this.Usuario.Contrasena, this.Usuario.Mail, this.Usuario.Organizacion)
+      .then(res => {
+        this.closeModal();
+      })
+      .catch(err => {
+        this.closeModal();
+      });
+  }
+
+
+  //CLIENTES
   Cliente = {
     Nombre: '',
     ApellidoP: '',
@@ -72,7 +153,7 @@ export class MyModal {
     Edo_Nacimiento: '',
     Sector: '',
     CP: '',
-    Identificador:'',
+    Identificador: '',
     Aval: {
       Nombre: '',
       ApellidoP: '',
@@ -86,21 +167,146 @@ export class MyModal {
     Paso: 1
   }
   Txt_Btn_Cliente = 'Siguiente';
+  Incomplete = false;
+  Info_Cliente;
 
+  AgregarClientes() {
+    this.Incomplete = false;
+    this.btn_disabled = true;
+
+    if (this.Cliente.Paso === 1) {
+
+      let cliente = gv.clientes.filter(cliente => {
+        return cliente[gv.identificador] === this.Cliente.Identificador;
+      });
+
+      if (this.Tipo === gv.Nuevo && cliente[0] !== undefined) {
+        this.Incomplete = true;
+        this.AlertText = "Ya hay un usuario con ese identificador";
+        this.btn_disabled = false;
+
+        return;
+      } else {
+
+        if (this.Cliente.Nombre === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un nombre";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.ApellidoP === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un apellido paterno";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.ApellidoM === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un apellido materno";
+          this.btn_disabled = false;
+          return;
+        }
+
+        if (this.Cliente.Calle === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa la calle";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.NumeroExt === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa el numero exterior";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.Colonia === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un colonia de residencia";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.Municipio === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un municipio de residencia";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.Estado === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa el estado de residencia";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.CP === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un codigo postal";
+          this.btn_disabled = false;
+          return;
+        }
+
+        if (this.Cliente.Telefono === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un telefono";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.CURP === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa un CURP";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.Cumpleanos === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa la fecha de nacimiento";
+          this.btn_disabled = false;
+          return;
+        }
+        if (this.Cliente.Sexo === '') {
+          this.Incomplete = true;
+          this.AlertText = "Ingresa el sexo de la persona";
+          this.btn_disabled = false;
+          return;
+        }
+
+        this.Cliente.Paso = 2;
+        this.Txt_Btn_Cliente = 'Registrar cliente';
+        this.btn_disabled = false;
+      }
+    } else {
+
+      if (this.Cliente.NumeroInt === '') {
+        this.Cliente.NumeroInt = ' ';
+      }
+
+      this.gf.NuevoCliente(this.Cliente.Nombre + '_' + this.Cliente.ApellidoP + '_' + this.Cliente.ApellidoM,
+        this.Cliente.Calle + '_' + this.Cliente.NumeroExt + '_' + this.Cliente.NumeroInt + '_' + this.Cliente.Colonia + '_' +
+        this.Cliente.Municipio + '_' + this.Cliente.Estado + '_' + this.Cliente.CP,
+        this.Cliente.Telefono, this.Cliente.CURP, this.Cliente.Cumpleanos, this.Cliente.Sexo,
+        this.Cliente.Aval.Nombre + '_' + this.Cliente.Aval.ApellidoP + '_' + this.Cliente.Aval.ApellidoM,
+        this.Cliente.Aval.Calle + '_' + this.Cliente.Aval.Numero + '_' + this.Cliente.Aval.Colonia,
+        this.Cliente.Aval.Telefono, this.Cliente.Aval.CURP, this.Cliente.Identificador)
+        .then(res => {
+          if (res) {
+            this.closeModal();
+          } else {
+
+          }
+        })
+    }
+  }
+
+  //PAGOS
+  ProximosArr = [];
+  PagosArr = [];
+  Info_Credito = [];
   In = {
-    Pagado: {
-      Cantidad: '',
-      Tipo: '',
-      Razon: '',
-      Date: ''
-    },
     Posponer: {
       Date: '',
-      Razon: ''
+      Razon: '',
+      Hora: ''
     },
-    Multa: {
-      Multa: ''
-    },
+
     Liquidar: {
       Cantidad: ''
     },
@@ -113,272 +319,143 @@ export class MyModal {
       Pagos: ''
     },
   }
+  Key_Primer_Pago;
+  Selection = 'Posponer';
+  Btn_Txt = 'Posponer';
 
-  closeModal() {
-    // using the injected ModalController this page
-    // can "dismiss" itself and optionally pass back data
-
-    this.modalCtrl.dismiss({
-      'dismissed': true
-    });
-  }
-
-  ngOnInit() {
-
-  }
-
-  AgregarUsuario() {
-    if (this.Usuario.Mail === '') {
-      this.Incomplete = true;
-      this.AlertText = 'Falta el mail'
-      return;
+  Cambio() {
+    switch (this.Selection) {
+      case 'Posponer':
+        this.Btn_Txt = 'Posponer pago'
+        break;
+      case 'Liquidar':
+        this.Btn_Txt = 'Liquidar credito'
+        break;
+      case 'Re estructurar':
+        this.Btn_Txt = 'Re estructurar credito'
+        break;
+      case 'Agregar pagos':
+        this.Btn_Txt = 'Agregar pagos'
+        break;
+      case 'Eliminar credito':
+        this.Btn_Txt = 'Eliminar credito'
+        break;
     }
-
-    this.gf.NewCollaborator(this.Usuario.Nombre, this.Usuario.Roll, this.Usuario.Contrasena, this.Usuario.Mail)
-      .then(res => {
-        this.closeModal();
-
-      })
-      .catch(err => {
-        this.closeModal();
-
-      });
   }
 
-  AgregarClientes() {
-    if (this.Cliente.Paso === 1) {
-      this.Cliente.Paso = 2;
-      this.Txt_Btn_Cliente = 'Registrar cliente';
-    } else {
-      console.log(this.Cliente.Nombre + ' ' + this.Cliente.ApellidoP + ' ' + this.Cliente.ApellidoM);//
-      console.log(this.Cliente.Calle + ' ' + this.Cliente.NumeroExt + ' ' + this.Cliente.NumeroInt);//
-      console.log(this.Cliente.Colonia + ' ' + this.Cliente.Municipio + ' ' + this.Cliente.Estado + ' ' + this.Cliente.CP);//
-      console.log(this.Cliente.Telefono)//
-      console.log(this.Cliente.CURP)//
-      console.log(this.Cliente.Cumpleanos)//
-      console.log(this.Cliente.Sexo)
-      console.log(this.Cliente.Identificador)
+  PayCredit() {
+    this.Incomplete = false;
+    this.btn_disabled = true;
 
-      console.log('Aval')
-      console.log(this.Cliente.Aval.Nombre + ' ' + this.Cliente.Aval.ApellidoP + ' ' + this.Cliente.Aval.ApellidoM)
-      console.log(this.Cliente.Aval.Calle + ' ' + this.Cliente.Aval.Numero + ' ' + this.Cliente.Aval.Colonia)
-      console.log(this.Cliente.Aval.CURP)
-      console.log(this.Cliente.Aval.Telefono)
+    switch (this.Selection) {
+      case 'Posponer':
+        if (this.In.Posponer.Date === '' || this.In.Posponer.Razon === '') {
+          this.Incomplete = true;
+          this.AlertText = 'Falta información'
+          this.btn_disabled = false;
+          return;
+        }
 
-      this.gf.NuevoCliente(this.Cliente.Nombre + ' ' + this.Cliente.ApellidoP + ' ' + this.Cliente.ApellidoM,
-        this.Cliente.Calle + ' ' + this.Cliente.NumeroExt + ' ' + this.Cliente.NumeroInt + ' ' + this.Cliente.Colonia + ' ' +
-        this.Cliente.Municipio + ' ' + this.Cliente.Estado + ' ' + this.Cliente.CP,
-        this.Cliente.Telefono, this.Cliente.CURP, this.Cliente.Cumpleanos, this.Cliente.Sexo,
-        this.Cliente.Aval.Nombre + ' ' + this.Cliente.Aval.ApellidoP + ' ' + this.Cliente.Aval.ApellidoM,
-        this.Cliente.Aval.Calle + ' ' + this.Cliente.Aval.Numero + ' ' + this.Cliente.Aval.Colonia,
-        this.Cliente.Aval.Telefono, this.Cliente.Aval.CURP, this.Cliente.Identificador)
-        .then(res =>{
-          if(res){
-            this.closeModal();
+        let fecha = new Date(this.In.Posponer.Date);
+
+        this.gf.PosponerPago(this.ProximosArr[0], gv.usuario[gv.nombre], fecha, this.In.Posponer.Razon)
+          .then(res => {
+            if (res) {
+
+              this.modalCtrl.dismiss({
+                'dismissed': true
+              });
+
+            } else {
+
+            }
+            this.btn_disabled = false;
+          });
+
+        break;
+
+    case 'Liquidar':
+      if (this.In.Liquidar.Cantidad === '') {
+        this.Incomplete = true;
+        this.AlertText = 'Falta información'
+        this.btn_disabled = false;
+        return;
+      }
+      this.gf.LiquidarCredito(this.PagosArr, gv.usuario[gv.nombre], parseInt(this.In.Liquidar.Cantidad),
+        this.PagosArr[0], this.ProximosArr[0])
+        .then(res => {
+          if (res) {
+            this.modalCtrl.dismiss({
+              'dismissed': true
+            });
           } else {
-            
+            this.btn_disabled = false;
           }
-        })
+        });
+      break;
+
+    case 'Re estructurar':
+      if (this.In.Re_Estructurar.Pago === '' || this.In.Re_Estructurar.Period === '' || this.In.Re_Estructurar.Date === '') {
+        this.Incomplete = true;
+        this.AlertText = 'Falta información'
+        this.btn_disabled = false;
+        return;
+      }
+
+      if(this.ProximosArr.length === this.PagosArr.length){
+        this.gf.Toast("No se puede reestructurar el primer pago elimina el credito e ingresa uno nuevo", 2000);
+        this.btn_disabled = false;
+        return;
+      }
+
+      let fecha_restructura = new Date(this.In.Re_Estructurar.Date);
+
+      this.gf.ReestructurarCredito(this.ProximosArr[0], parseInt(this.In.Re_Estructurar.Pago), this.In.Re_Estructurar.Period,
+        this.PagosArr, fecha_restructura)
+        .then(res => {
+          if (res) {
+            this.modalCtrl.dismiss({
+              'dismissed': true
+            });
+          } else {
+            this.btn_disabled = false;
+          }
+        });
+      break;
+
+    case 'Agregar pagos':
+      if (this.In.Agregar_pagos.Pagos === '') {
+        this.Incomplete = true;
+        this.AlertText = 'Falta información'
+        this.btn_disabled = false;
+        return;
+      }
+      this.gf.AgregarPagosMulta(this.PagosArr, parseInt(this.In.Agregar_pagos.Pagos))
+        .then(res => {
+          if (res) {
+            this.modalCtrl.dismiss({
+              'dismissed': true
+            });
+          } else {
+            this.btn_disabled = false;
+          }
+        });
+      break;
+
+      case 'Eliminar credito':
+        this.gf.EliminarCredito(this.PagosArr)
+          .then(res => {
+            if (res) {
+              this.modalCtrl.dismiss({
+                'dismissed': true
+              });
+            } else {
+              this.btn_disabled = false;
+            }
+          });
+        break;
+
     }
-
   }
+
 }
-
-/*
-
-  <ion-grid *ngIf="type === 'Usuario'">
-
-    <ion-row>
-      <ion-col>
-        <ion-input placeholder="Nombre" [(ngModel)]="Usuario.Nombre">
-        </ion-input>
-      </ion-col>
-    </ion-row>
-
-    <ion-row>
-      <ion-col>
-        <ion-input placeholder="Mail" [(ngModel)]="Usuario.Mail">
-        </ion-input>
-      </ion-col>
-    </ion-row>
-
-    <ion-item>
-      <ion-label>Seleccionar</ion-label>
-      <ion-select [(ngModel)]="Usuario.Roll" placeholder="Roll">
-        <ion-select-option value="{{ gv.Administrador }}">Administrador</ion-select-option>
-        <ion-select-option value="{{ gv.Cobrador }}">Cobrador</ion-select-option>
-        <ion-select-option value="{{ gv.Oficina }}">Oficina</ion-select-option>
-        <ion-select-option value="{{ gv.Dueno }}">Dueño</ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <ion-row>
-      <ion-col>
-        <ion-input placeholder="Contraseña" [(ngModel)]="Usuario.Contrasena">
-        </ion-input>
-      </ion-col>
-      <ion-col>
-        <ion-input placeholder="Confirmar contraseña" [(ngModel)]="Usuario.Confirmar">
-        </ion-input>
-      </ion-col>
-    </ion-row>
-
-    <ion-row>
-      <ion-col>
-        <ion-button [disabled]="btn_disabled" (click)="AgregarUsuario()">Agregar</ion-button>
-      </ion-col>
-    </ion-row>
-
-  </ion-grid>
-
-  <ion-grid *ngIf="type === 'pay'">
-
-    <ion-item>
-      <ion-label>Seleccionar</ion-label>
-      <ion-select [(ngModel)]="Selection" placeholder="Pagado" (ngModelChange)='Cambio()'>
-        <ion-select-option value="Pagado">Pagado</ion-select-option>
-        <ion-select-option value="Posponer">Posponer</ion-select-option>
-        <ion-select-option value="Multa">Multa</ion-select-option>
-        <ion-select-option value="Liquidar">Liquidar</ion-select-option>
-        <ion-select-option value="Re estructurar">Re estructurar</ion-select-option>
-        <ion-select-option value="Agregar pagos">Pagos de penalizacion</ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <div *ngIf="Selection === 'Pagado'">
-      <ion-text *ngIf="NextPayment !== undefined">
-        El proximo pago #{{ NextPayment[gv.pay_num] }} es por {{ NextPayment[gv.payment] }} del dia
-        {{ NextPayment[gv.date] }}.
-      </ion-text>
-      <ion-row>
-        <ion-text>
-          Cantidad a pagar.
-        </ion-text>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <ion-input placeholder="Cantidad" [(ngModel)]="In.Pagado.Cantidad" (ngModelChange)='CheckPayment()'>
-          </ion-input>
-        </ion-col>
-      </ion-row>
-
-      <div *ngIf="In.Pagado.Tipo === 'Parcial'">
-        <ion-text>
-          La cantidad ingresada es menor al pago. Ingresa fecha de pago complementario y razon de pago parcial.
-        </ion-text>
-        <ion-row>
-          <ion-col>
-            <ion-item>
-              <ion-label>FECHA</ion-label>
-              <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Select Date" max="2050"
-                [(ngModel)]="In.Pagado.Date">
-              </ion-datetime>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-
-        <ion-row>
-          <ion-col>
-            <ion-input placeholder="Razon" [(ngModel)]="In.Pagado.Razon"></ion-input>
-          </ion-col>
-        </ion-row>
-      </div>
-    </div>
-
-    <div *ngIf="Selection === 'Posponer'">
-      <ion-text>
-        Ingresa la fecha a la que se pospondra el pago y la razon de posponerlo.
-      </ion-text>
-      <ion-row>
-        <ion-col>
-          <ion-item>
-            <ion-label>FECHA</ion-label>
-            <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Select Date" max="2050"
-              [(ngModel)]="In.Posponer.Date"></ion-datetime>
-          </ion-item>
-        </ion-col>
-      </ion-row>
-
-      <ion-row>
-        <ion-col>
-          <ion-input placeholder="Razon" [(ngModel)]="In.Posponer.Razon"></ion-input>
-        </ion-col>
-      </ion-row>
-    </div>
-
-    <div *ngIf="Selection === 'Multa'">
-      <ion-text>
-        Ingresa la cantidad de multa. Se registrara tu pago completo mas la multa.
-      </ion-text>
-      <ion-row>
-        <ion-col>
-          <ion-input placeholder="Multa" [(ngModel)]="In.Multa.Multa"></ion-input>
-        </ion-col>
-      </ion-row>
-    </div>
-
-    <div *ngIf="Selection === 'Liquidar'">
-      <ion-text>
-        ¿Seguro que quieres liquidar el credito completo?
-        Faltan {{ Credit_Info[gv.remaining_pay] }} pagos con un total de $
-        {{ Credit_Info[gv.status_vencido] + Credit_Info[gv.status_proximo]}}
-      </ion-text>
-      <ion-row>
-        <ion-col>
-          <ion-input placeholder="Cantidad a reducir" [(ngModel)]="In.Liquidar.Cantidad"></ion-input>
-        </ion-col>
-      </ion-row>
-    </div>
-
-    <div *ngIf="Selection === 'Re estructurar'">
-      <ion-text>
-        Ingresa la nueva cantidad a pagar.
-        Fecha de inicio de los pagos.
-        Y el periodo de los pagos
-      </ion-text>
-
-      <ion-row>
-        <ion-col>
-          <ion-input placeholder="Pago" [(ngModel)]="In.Re_Estructurar.Pago"></ion-input>
-        </ion-col>
-      </ion-row>
-
-      <ion-row>
-        <ion-col>
-          <ion-item>
-            <ion-label>FECHA</ion-label>
-            <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Select Date" max="2050"
-              [(ngModel)]="In.Re_Estructurar.Date"></ion-datetime>
-          </ion-item>
-        </ion-col>
-      </ion-row>
-
-      <ion-item>
-        <ion-select placeholder="Tipo" [(ngModel)]="In.Re_Estructurar.Period">
-          <ion-select-option value="{{ gv.daily }}">Diario</ion-select-option>
-          <ion-select-option value="{{ gv.weekly }}">Semanal</ion-select-option>
-          <ion-select-option value="{{ gv.biweekly }}">Quincenal</ion-select-option>
-          <ion-select-option value="{{ gv.monthly }}">Mensual</ion-select-option>
-        </ion-select>
-      </ion-item>
-    </div>
-
-    <div *ngIf="Selection === 'Agregar pagos'">
-      <ion-text>
-        Ingresa la cantidad de pagos que se le agregaran al credito
-      </ion-text>
-
-      <ion-row>
-        <ion-col>
-          <ion-input placeholder="Pago" [(ngModel)]="In.Agregar_pagos.Pagos"></ion-input>
-        </ion-col>
-      </ion-row>
-    </div>
-
-    <ion-row>
-      <ion-col>
-        <ion-button [disabled]="btn_disabled" (click)="PayCredit()">{{ Btn_Txt }}</ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-*/

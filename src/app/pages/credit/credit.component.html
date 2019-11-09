@@ -30,20 +30,20 @@
       <ion-col col-6>
         <ion-item class="input">
           <ion-label floating>Efectivo: $</ion-label>
-          <ion-input [(ngModel)]="in.Efectivo"></ion-input>
+          <ion-input type="number" [(ngModel)]="in.Efectivo"></ion-input>
         </ion-item>
       </ion-col>
       <ion-col col-6>
         <ion-item class="input">
           <ion-label floating>Numero de pagos:</ion-label>
-          <ion-input [(ngModel)]="in.Num_Pagos" (ngModelChange)='CambioPagoNum(in.Pago, in.Num_Pagos)'>
+          <ion-input type="number" [(ngModel)]="in.Num_Pagos" (ngModelChange)='CambioPagoNum(in.Pago, in.Num_Pagos)'>
           </ion-input>
         </ion-item>
       </ion-col>
       <ion-col col-6>
         <ion-item class="input">
           <ion-label floating>Credito: $</ion-label>
-          <ion-input [(ngModel)]="in.Credito"></ion-input>
+          <ion-input type="number" [(ngModel)]="in.Credito"></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>
@@ -52,7 +52,8 @@
       <ion-col col-6>
         <ion-item class="input">
           <ion-label floating>Pago: $</ion-label>
-          <ion-input [(ngModel)]="in.Pago" (ngModelChange)='CambioPagoNum(in.Pago, in.Num_Pagos)'></ion-input>
+          <ion-input type="number" [(ngModel)]="in.Pago" (ngModelChange)='CambioPagoNum(in.Pago, in.Num_Pagos)'>
+          </ion-input>
         </ion-item>
       </ion-col>
       <ion-col col-6>
@@ -106,30 +107,38 @@
       <h3>Garantias</h3>
     </ion-row>
 
+    <ion-row *ngFor="let garantia of ArrGarantias; let i = index" [attr.data-index]="i">
+      <ion-col col-4>
+        <ion-item class=" input">
+      <ion-input placeholder="Articulo" [(ngModel)]="ArrGarantias[i][gv.articulo]">
+      </ion-input>
+      </ion-item>
+      </ion-col>
+      <ion-col col-4>
+        <ion-item class="input">
+          <ion-input placeholder="Marca" [(ngModel)]="ArrGarantias[i][gv.marca]">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-4>
+        <ion-item class="input">
+          <ion-input placeholder="Identificador" [(ngModel)]="ArrGarantias[i][gv.identificador]">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col col-4 *ngIf="ArrGarantias.length > 1">
+          <ion-icon color="medium" name="close-circle-outline" (click)="EliminarGarantia(i)">
+          </ion-icon>
+        </ion-col>
+    </ion-row>
+
     <ion-row>
-      <ion-col col-4>
-        <ion-item class="input">
-          <ion-input placeholder="Articulo">
-          </ion-input>
-        </ion-item>
-      </ion-col>
-      <ion-col col-4>
-        <ion-item class="input">
-          <ion-input placeholder="Marca">
-          </ion-input>
-        </ion-item>
-      </ion-col>
-      <ion-col col-4>
-        <ion-item class="input">
-          <ion-input placeholder="Identificador">
-          </ion-input>
-        </ion-item>
-      </ion-col>
+      <ion-button (click)="AgregarGarantia()">Agregar garantia</ion-button>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <ion-button [disabled]="Btn_Desactivado" (click)="Pay()">Agregar credito</ion-button>
+        <ion-button [disabled]="Btn_Desactivado" (click)="AgregarCredito()">Agregar credito</ion-button>
       </ion-col>
       <ion-col *ngIf="Alerta">
         <ion-text>{{ AlertMsj }}</ion-text>

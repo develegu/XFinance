@@ -37,42 +37,58 @@ export class LoginComponent {
     await modal.present();
   }
 
-  login = {
-    mail: '',
-    contrasena: ''
+  ngOnInit() {
+    this.gf.DisableSideMenu();
+    this.gf.CheckLogin();
   }
 
+  login = {
+    email: '',
+    password: ''
+  }
+  errors = {
+    email: '',
+    password: ''
+  };
+
   Login() {
-    console.log(this.login.mail)
-    console.log(this.login.contrasena)
+    this.gf.loginUser(this.login).then((user_return) => {
+      if (user_return.user) {
+        console.log('User returned');
+        console.log(user_return.user);
 
-    let subs = this.db.collection(gv.FB_Usuarios,
-      ref => ref.where(gv.mail, '==', this.login.mail)).stateChanges().subscribe(serverItems => {
-        subs.unsubscribe();
+        this.db.collection(gv.FB_Usuarios).doc(user_return.user.uid).get().subscribe(serverItems => {
+          console.log("Search")
+          console.log(serverItems.data())
+          serverItems.data()[gv.key] = user_return.user.uid;
+          this.localStorage.set('user', serverItems.data());
+          gv.usuario = serverItems.data();
 
-        if (serverItems.length == 0) {
-          console.log("No routes");
-
-        } else {
-          serverItems.forEach((a, index, array) => {
-            console.log(a.payload.doc.data()); //a.payload.doc.id
-
-            let item: any = a.payload.doc.data();
+          this.login = {
+            email: '',
+            password: ''
+          };
           
-            if (a.payload.doc.data()[gv.password] === this.login.contrasena) {
-              console.log("login")
-              gv.usuario = a.payload.doc.data();
-              console.log(gv.usuario)
+          this.gf.ListenersClientesPagos();
+          this.gf.ListenersColaboradores();
+          this.gf.EnableSideMenu();
+  
+          this.gf.IrAClientes();
+        });
+      }
+    }).catch((error) => {
+      if (error.code === "auth/wrong-password") {
+        this.errors.password = 'La contraseña es incorrecta';
+      }
+      if (error.code === "auth/user-not-found") {
+        this.errors.email = 'No existe usuario con ese mail';
+      }
+      if (error.code === "auth/invalid-email") {
+        this.errors.email = 'El formato de mail es incorrecto';
+      }
 
-              this.localStorage.set('user', gv.usuario)
-            }
-
-            if (index === (array.length - 1)) {
-              console.log("Ya termino");
-
-            }
-          });
-        }
-      })
+      console.log("login error")
+      console.log(error);
+    });
   }
 }

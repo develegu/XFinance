@@ -10,20 +10,14 @@
 </ion-header>
 
 <ion-content>
-  <ion-list lines="none">
-    <ion-item (click)="openModal()">
-      <ion-icon slot="start" color="medium" name="grid"></ion-icon>
-      <ion-label>Open Modal</ion-label>
-    </ion-item>
-  </ion-list>
 
   <ion-col>
-    <ion-input placeholder="Mail" [(ngModel)]="login.mail">
+    <ion-input placeholder="Mail" [(ngModel)]="login.email">
     </ion-input>
   </ion-col>
 
   <ion-col>
-    <ion-input placeholder="Contraseña" [(ngModel)]="login.contrasena">
+    <ion-input placeholder="Contraseña" [(ngModel)]="login.password">
     </ion-input>
   </ion-col>
 

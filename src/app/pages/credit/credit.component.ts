@@ -22,6 +22,11 @@ export class CreditComponent {
   Alerta = false;
   AlertMsj = '';
   Btn_Desactivado = false;
+  ArrGarantias = [{
+    [gv.identificador]: '',
+    [gv.marca]: '',
+    [gv.articulo]: ''
+  }];
 
   in = {
     IDCliente: '',
@@ -48,11 +53,29 @@ export class CreditComponent {
     }
   }
 
-  Pay() {
+  AgregarGarantia(){
+    this.ArrGarantias.push({
+    [gv.identificador]: '',
+    [gv.marca]: '',
+    [gv.articulo]: ''
+    })
+  }
+  EliminarGarantia(index){
+    this.ArrGarantias.splice(index, 1);
+  }
+
+  AgregarCredito() {
+    for(let x = 0; x < this.ArrGarantias.length; x++){
+      if(this.ArrGarantias[x][gv.articulo] === '' || this.ArrGarantias[x][gv.marca] === '' ||this.ArrGarantias[x][gv.identificador] === ''){
+        this.Alerta = true;
+        this.AlertMsj = 'Falta un campo en garantaias';
+        this.Btn_Desactivado = false;
+        return;
+      }
+    }
+
     this.Alerta = false;
     this.Btn_Desactivado = true;
-
-    console.log(this.in)
 
     if (this.in.IDCliente === '') {
       this.Alerta = true;
@@ -141,8 +164,9 @@ export class CreditComponent {
       this.in.Horario = this.gf.AgregarCero(hora.getHours()) + this.gf.AgregarCero(hora.getMinutes());
     }
 
-    this.gf.RegistratCredito(parseInt(this.in.Num_Pagos), this.cliente[gv.nombre], this.cliente[gv.key], parseInt(this.in.Credito), this.in.Fecha,
-      this.in.Periodo, parseInt(this.in.Pago), this.in.IDCliente, parseInt(this.in.Efectivo), this.in.Total_Credito, this.in.Deposito, this.in.Horario)
+    this.gf.RegistratCredito(parseInt(this.in.Num_Pagos), this.cliente[gv.nombre], this.cliente[gv.key], parseInt(this.in.Credito),
+      this.in.Fecha, this.in.Periodo, parseInt(this.in.Pago), this.in.IDCliente, parseInt(this.in.Efectivo),
+      this.in.Total_Credito, this.in.Deposito, this.in.Horario, this.ArrGarantias)
       .then(res => {
         if (res) {
           this.gf.Toast('Credito registrado', 2000)
