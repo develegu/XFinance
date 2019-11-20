@@ -12,7 +12,7 @@
 <ion-content>
 
   <ion-col>
-    <ion-button (click)="presentClienteModal()">Cliente</ion-button>
+    <ion-button (click)="presentClienteModal()">Nuevo cliente</ion-button>
     <ion-input placeholder="ID Cliente" [(ngModel)]="IDCliente" (ngModelChange)='BuscarCliente()'></ion-input>
   </ion-col>
 
@@ -23,17 +23,11 @@
         <ion-col>
           Cliente: {{ client[gv.identificador] }}
         </ion-col>
-        <ion-col>
-          Aval
-        </ion-col>
       </ion-row>
 
       <ion-row style="justify-content: center; background-color: #efefef;">
         <ion-col>
           {{ this.gf.QuitarBarraAInfo(client[gv.nombre]) }}
-        </ion-col>
-        <ion-col>
-          {{ this.gf.QuitarBarraAInfo(client[gv.aval][gv.nombre]) }}
         </ion-col>
       </ion-row>
 
@@ -41,17 +35,11 @@
         <ion-col>
           {{ this.gf.QuitarBarraAInfo(client[gv.direccion]) }}
         </ion-col>
-        <ion-col>
-          {{ this.gf.QuitarBarraAInfo(client[gv.aval][gv.direccion]) }}
-        </ion-col>
       </ion-row>
 
       <ion-row style="justify-content: center; background-color: #efefef;">
         <ion-col>
           {{ client[gv.telefono] }}
-        </ion-col>
-        <ion-col>
-          {{ client[gv.aval][gv.telefono] }}
         </ion-col>
       </ion-row>
 
@@ -90,7 +78,7 @@
             Cantidad: {{ ArrCreditos[this.Selected + gv.info][1][0][gv.pago] }}
           </ion-col>
           <ion-col>
-            Fecha: {{ ArrCreditos[this.Selected + gv.info][1][0][gv.fecha] }}
+            Fecha: {{ this.gf.GetYYMMDDDateFromRef(ArrCreditos[this.Selected + gv.info][1][0][gv.fecha]) }}
           </ion-col>
         </ion-row>
 
@@ -126,16 +114,66 @@
           <ion-col *ngIf='Incomplete'>
             <ion-text>{{ AlertText }}</ion-text>
           </ion-col>
+
         </ion-row>
+
+        <ion-col *ngIf="Selected === info.key">
+          <h5 (click)="VerPagos = !VerPagos">Ver pagos</h5>
+        </ion-col>
+      </ion-row>
+
+    <div *ngIf="VerPagos">
+      <ion-row *ngFor="let pago of PagosSeleccionados">
+        <ion-col *ngIf="pago[gv.multa] !== undefined">
+          ${{ pago[gv.pago] - pago[gv.multa] }}.00
+        </ion-col>
+        <ion-col *ngIf="pago[gv.multa] === undefined">
+          ${{ pago[gv.pago] }}.00
+        </ion-col>
+        <ion-col>
+          {{ this.gf.GetYYMMDDDateFromRef(pago[gv.fecha]) }}
+        </ion-col>
+        <ion-col *ngIf="pago[gv.dia_cobro] !== undefined">
+          {{ this.gf.GetYYMMDDDateFromRef(pago[gv.dia_cobro]) }}
+        </ion-col>
+        <ion-col *ngIf="pago[gv.dia_cobro] === undefined">
+          Pendiente
+        </ion-col>
+        <ion-col *ngIf="pago[gv.multa] !== undefined">
+          ${{ pago[gv.multa] }}.00
+        </ion-col>
+        <ion-col *ngIf="pago[gv.multa] === undefined">
+          $ 00.00
+        </ion-col>
+        <ion-col>
+          ${{ pago[gv.pago] }}.00
+        </ion-col>
+        <ion-col>
+          {{ pago[gv.num_pago] }}
+        </ion-col>
+        <ion-col>
+          {{ pago[gv.cobrado_por] }}
+        </ion-col>
+        <ion-col *ngIf="pago[gv.status] === gv.status_pagado">
+          <ion-icon color="medium" name="close-circle-outline" (click)="RegresarPago(pago)">
+          </ion-icon>
+        </ion-col>
+      </ion-row>
+    </div>
+
+      <ion-row *ngIf="Pagos_Inicial.length === 0">
+        <ion-button (click)="NuevoCredito()">Ingresar credito</ion-button>
       </ion-row>
 
     </div>
 
     <ion-col size="2" style="margin-left: 800px; position: absolute;">
-      <ion-icon color="medium" name="close-circle-outline" (click)="ModificarClienteModal()">
+      <ion-icon color="medium" name="close-circle-outline" (click)="OpcionesDeCredito()">
       </ion-icon>
     </ion-col>
 
   </ion-row>
+
+
 
 </ion-content>

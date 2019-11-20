@@ -58,4 +58,15 @@ export class adminComponent {
     modal.present();
   }
 
+  async AgregarProducto(){
+      const modal = await this.modalController.create({
+        component: MyModal,
+        componentProps: {
+          type: "Producto"
+        }
+      });
+  
+      modal.present();
+    }
+
 }

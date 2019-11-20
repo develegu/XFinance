@@ -1,9 +1,9 @@
 import { Component, IterableDiffers } from "@angular/core";
-import { ModalController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MyModal } from "src/app/common/modals/my-modal/my-modal.component";
 import { CommonService } from 'src/app/common/services/common.service';
 import { gv } from 'src/app/common/constants';
+import { ModalController, ActionSheetController } from '@ionic/angular';
 
 @Component({
   selector: "app-clients",
@@ -12,6 +12,7 @@ import { gv } from 'src/app/common/constants';
 })
 
 export class ClientsComponent {
+
   IDCliente = '';
   Cliente = [];
   pagos_cliente = [];
@@ -23,6 +24,8 @@ export class ClientsComponent {
   ArrCreditos = [];
   ArrInfo = [];
   Selected;
+  PagosSeleccionados = [];
+  VerPagos = false;
 
   Pagos_Proximos = [];
   Incomplete;
@@ -30,9 +33,12 @@ export class ClientsComponent {
 
   public gv = gv;
 
-  constructor(private modalController: ModalController,
+  constructor(
     public db: AngularFirestore,
+    private modalController: ModalController,
     public _iterableDiffers: IterableDiffers,
+    private actionSheetController: ActionSheetController,
+    //private camera: Camera,
     public gf: CommonService) {
     this.iterableDiffer = this._iterableDiffers.find([]).create(null);
 
@@ -40,6 +46,7 @@ export class ClientsComponent {
 
   ngOnInit() {
     this.gf.CheckLogin();
+    let fecha = new Date(1994, 10 - 1, 27)
   }
 
   iterableDiffer;
@@ -103,7 +110,6 @@ export class ClientsComponent {
           return pago[gv.key_primer_pago] === this.Pagos_Inicial[x][gv.key];
         });
 
-        PagosDeCredito.push(this.Pagos_Inicial[x]);
         PagosDeCredito.sort((a, b) => { return a[gv.num_pago] - b[gv.num_pago] });
 
         this.ArrInfo[this.Pagos_Inicial[x][gv.key]] = this.gf.GetInformacionCreditoInd(PagosDeCredito);
@@ -118,7 +124,8 @@ export class ClientsComponent {
         }));
 
         this.ArrCreditos[this.Pagos_Inicial[x][gv.key] + gv.info] = ArrPagos;
-        console.log(this.ArrCreditos)
+
+        this.PagosSeleccionados = this.ArrCreditos[this.Pagos_Inicial[x][gv.key] + gv.info][0];
 
         if (x === 0 && this.Selected === undefined) {
           this.Selected = this.Pagos_Inicial[x][gv.key];
@@ -173,6 +180,7 @@ export class ClientsComponent {
         if (res) {
           this.Multa = '';
           this.Pago = '';
+          this.Pago_Total = '';
 
         } else {
 
@@ -183,16 +191,61 @@ export class ClientsComponent {
 
   }
 
-  async OpcionesDeCreditoModal() {
-    const modal = await this.modalController.create({
-      component: MyModal,
-      componentProps: {
-        type: "Pago",
-        Key_Primer_Pago: this.Selected
-      }
+  async OpcionesDeCredito() {
+    const actionSheet = await this.actionSheetController.create({
+      header: "Opciones de credito",
+      buttons: [
+        {
+          text: 'Foto cliente',
+          handler: () => {
+            //this.takePicture(this.camera.PictureSourceType.CAMERA);
+          }
+        },
+        {
+          text: 'Foto fachada',
+          handler: () => {
+            //this.takePicture(this.camera.PictureSourceType.CAMERA);
+          }
+        },
+        {
+          text: 'Foto aval',
+          handler: () => {
+            //this.takePicture(this.camera.PictureSourceType.CAMERA);
+          }
+        },
+        {
+          text: 'Foto IFE',
+          handler: () => {
+            //this.takePicture(this.camera.PictureSourceType.CAMERA);
+          }
+        },
+        {
+          text: 'Editar cliente',
+          handler: () => {
+            this.ModificarClienteModal();
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }
+      ]
     });
+    await actionSheet.present();
+  }
 
-    modal.present();
+  OpcionesDeCliente() {
+
+  }
+
+  NuevoCredito() {
+    gv.ClienteToCreditoInfo = this.Cliente;
+
+    this.gf.IrACreditos()
+  }
+
+  RegresarPago(Pago) {
+    this.gf.RegresarPagoAlerta(Pago, this.ArrCreditos[this.Selected + gv.info][0][0], this.ArrCreditos[this.Selected + gv.info][0])
   }
 
 }

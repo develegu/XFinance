@@ -2,6 +2,9 @@ import { Component } from "@angular/core";
 import { AngularFirestore } from '@angular/fire/firestore';
 import { CommonService } from 'src/app/common/services/common.service';
 import { gv } from 'src/app/common/constants';
+import * as XLSX from 'xlsx';
+import { MyModal } from "src/app/common/modals/my-modal/my-modal.component";
+import { ModalController } from '@ionic/angular';
 
 @Component({
   selector: "app-credit",
@@ -13,20 +16,49 @@ export class CreditComponent {
 
   public gv = gv;
 
-  constructor(public db: AngularFirestore,
+  constructor(private modalController: ModalController,
+    public db: AngularFirestore,
     public gf: CommonService) {
-
   }
 
   cliente = [];
   Alerta = false;
   AlertMsj = '';
   Btn_Desactivado = false;
-  ArrGarantias = [{
-    [gv.identificador]: '',
-    [gv.marca]: '',
-    [gv.articulo]: ''
-  }];
+  ArrGarantias = [];
+
+  ArrProductos = [];
+
+  Cliente = {
+    Nombre: '',
+    ApellidoP: '',
+    ApellidoM: '',
+    Calle: '',
+    NumeroExt: '',
+    NumeroInt: '',
+    Colonia: '',
+    Municipio: '',
+    Estado: '',
+    Telefono: '',
+    CURP: '',
+    Cumpleanos: '',
+    Sexo: '',
+    Edo_Nacimiento: '',
+    Sector: '',
+    CP: '',
+    Identificador: '',
+    Aval: {
+      Nombre: '',
+      ApellidoP: '',
+      ApellidoM: '',
+      Calle: '',
+      Numero: '',
+      Colonia: '',
+      Telefono: '',
+      CURP: '',
+    },
+    Paso: 1
+  };
 
   in = {
     IDCliente: '',
@@ -39,10 +71,32 @@ export class CreditComponent {
     Horario: '',
     Periodo: '',
     Deposito: '',
+    Folio: '',
+    Producto: '',
+    Vivienda: '',
+    Anos_Antiguedad: '',
+    Meses_Antiguedad: '',
+    Ocupacion: ''
   }
 
   ngOnInit() {
     this.gf.CheckLogin();
+
+    if (gv.ClienteToCreditoInfo.length !== 0) {
+
+      this.cliente = gv.ClienteToCreditoInfo[0];
+      this.in.IDCliente = gv.ClienteToCreditoInfo[0][gv.identificador];
+      gv.ClienteToCreditoInfo = [];
+    }
+
+    this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Productos)
+      .get().subscribe(serverItems => {
+
+        serverItems.forEach((product) => {
+          this.ArrProductos.push(product.data())
+          console.log(product.data())
+        });
+      });
   }
 
   GetClient() {
@@ -53,20 +107,31 @@ export class CreditComponent {
     }
   }
 
-  AgregarGarantia(){
+  async presentAvalModal() {
+    const modal = await this.modalController.create({
+      component: MyModal,
+      componentProps: {
+        type: "Aval"
+      }
+    });
+
+    modal.present();
+  }
+
+  AgregarGarantia() {
     this.ArrGarantias.push({
-    [gv.identificador]: '',
-    [gv.marca]: '',
-    [gv.articulo]: ''
+      [gv.identificador]: '',
+      [gv.marca]: '',
+      [gv.articulo]: ''
     })
   }
-  EliminarGarantia(index){
+  EliminarGarantia(index) {
     this.ArrGarantias.splice(index, 1);
   }
 
   AgregarCredito() {
-    for(let x = 0; x < this.ArrGarantias.length; x++){
-      if(this.ArrGarantias[x][gv.articulo] === '' || this.ArrGarantias[x][gv.marca] === '' ||this.ArrGarantias[x][gv.identificador] === ''){
+    for (let x = 0; x < this.ArrGarantias.length; x++) {
+      if (this.ArrGarantias[x][gv.articulo] === '' || this.ArrGarantias[x][gv.marca] === '' || this.ArrGarantias[x][gv.identificador] === '') {
         this.Alerta = true;
         this.AlertMsj = 'Falta un campo en garantaias';
         this.Btn_Desactivado = false;
@@ -80,6 +145,12 @@ export class CreditComponent {
     if (this.in.IDCliente === '') {
       this.Alerta = true;
       this.AlertMsj = 'Ingresa numero de cliente';
+      this.Btn_Desactivado = false;
+      return;
+    }
+    if (this.in.Folio === '') {
+      this.Alerta = true;
+      this.AlertMsj = 'Ingresa numero de folio';
       this.Btn_Desactivado = false;
       return;
     }
@@ -166,7 +237,8 @@ export class CreditComponent {
 
     this.gf.RegistratCredito(parseInt(this.in.Num_Pagos), this.cliente[gv.nombre], this.cliente[gv.key], parseInt(this.in.Credito),
       this.in.Fecha, this.in.Periodo, parseInt(this.in.Pago), this.in.IDCliente, parseInt(this.in.Efectivo),
-      this.in.Total_Credito, this.in.Deposito, this.in.Horario, this.ArrGarantias)
+      this.in.Total_Credito, this.in.Deposito, this.in.Horario, this.ArrGarantias, this.in.Folio, this.in.Vivienda, 
+      this.in.Anos_Antiguedad + ' año(s), ' + this.in.Meses_Antiguedad + ' mes(es)', this.in.Ocupacion, gv.AvalArr)
       .then(res => {
         if (res) {
           this.gf.Toast('Credito registrado', 2000)
@@ -182,6 +254,13 @@ export class CreditComponent {
           this.in.Efectivo = '';
           this.in.Deposito = '';
           this.in.Horario = '';
+          this.in.Folio = '';
+          this.in.Vivienda = '';
+          this.in.Anos_Antiguedad = '';
+          this.in.Meses_Antiguedad = '';
+          this.in.Ocupacion = '';
+          gv.AvalArr = [];
+          this.ArrProductos = [];
         } else {
           this.gf.Toast('Error al registrar el credito', 2000)
         }
@@ -201,5 +280,60 @@ export class CreditComponent {
 
     this.in.Total_Credito = parseInt(Pago) * parseInt(Num_Pagos);
   }
+  /*
+    parseExcel = function (file) {
+      var reader = new FileReader();
+  
+      if (file !== undefined) {
+        reader.onload = function (e) {
+          var data = e.target.result
+  
+          var workbook = XLSX.read(data, {
+            type: 'binary'
+          });
+  
+          workbook.SheetNames.forEach(function (sheetName) {
+            // Here is your object
+            var XL_row_object = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+            console.log(XL_row_object)
+  
+            for (let x = 0; x < XL_row_object.length; x++) {
+  
+              let date = new Date('01/01/1900');
+              date.setDate(date.getDate() + XL_row_object[x]['Fecha nacimiento'] - 2);
+              console.log(date);
+            }
+          })
+        };
+        reader.onerror = function (ex) {
+          console.log(ex);
+        };
+  
+        reader.readAsBinaryString(file);
+      }
+    };
+  
+    handleFileSelect(evt) {
+      var files = evt.target.files; // FileList object
+      this.parseExcel(files[0]);
+    }
+    */
+
+  ProductoSeleccionado() {
+    console.log("producto")
+    console.log(this.ArrProductos[this.in.Producto])
+    this.in.Num_Pagos = this.ArrProductos[this.in.Producto][gv.total_pagos];
+    this.in.Credito = this.ArrProductos[this.in.Producto][gv.credito];
+    this.in.Pago = this.ArrProductos[this.in.Producto][gv.pago];
+    this.in.Total_Credito = this.ArrProductos[this.in.Producto][gv.total_credito];
+    this.in.Periodo = this.ArrProductos[this.in.Producto][gv.periodo];
+    this.in.Efectivo = this.ArrProductos[this.in.Producto][gv.efectivo];
+    console.log(this.in)
+  }
 
 }
+
+/*
+    <input type='file' (change)="handleFileSelect($event)">
+
+*/

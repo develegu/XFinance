@@ -4,7 +4,7 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>
-      Clients
+      Administrador
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -16,18 +16,37 @@
   </ion-col>
 
   <ion-row *ngFor="let user of gv.colaboradores">
-      <ion-col (click)="ModificarUsuarioModal(user)">
-        {{ user[gv.nombre] }}
-      </ion-col>
-      <ion-col>
-        {{ user[gv.roll] }}
-      </ion-col>
-      
-      <ion-col>
-        <ion-icon color="medium" name="close-circle-outline"
-          (click)="this.gf.EliminateCollaboratorAlert(user, user['key'])">
-        </ion-icon>
-      </ion-col>
-    </ion-row>
+    <ion-col (click)="ModificarUsuarioModal(user)">
+      {{ user[gv.nombre] }}
+    </ion-col>
+    <ion-col>
+      {{ user[gv.roll] }}
+    </ion-col>
+
+    <ion-col>
+      <ion-icon color="medium" name="close-circle-outline"
+        (click)="this.gf.EliminateCollaboratorAlert(user, user['key'])">
+      </ion-icon>
+    </ion-col>
+  </ion-row>
+
+  <ion-col>
+    <ion-button (click)="AgregarProducto()">Nuevo producto</ion-button>
+  </ion-col>
+
+  <ion-row *ngFor="let user of gv.colaboradores">
+    <ion-col (click)="ModificarUsuarioModal(user)">
+      {{ user[gv.nombre] }}
+    </ion-col>
+    <ion-col>
+      {{ user[gv.roll] }}
+    </ion-col>
+
+    <ion-col>
+      <ion-icon color="medium" name="close-circle-outline"
+        (click)="this.gf.EliminateCollaboratorAlert(user, user['key'])">
+      </ion-icon>
+    </ion-col>
+  </ion-row>
 
 </ion-content>
