@@ -47,23 +47,24 @@
 
       <ion-row *ngFor="let info of ArrInfo | keyvalue">
         <ion-radio mode="md" *ngIf="Selected === info.key" checked></ion-radio>
-        <ion-radio mode="md" *ngIf="Selected !== info.key" (ionSelect)="Selected = info.key"></ion-radio>
+        <ion-radio mode="md" *ngIf="Selected !== info.key" (ionSelect)="Selected = info.key"
+          (ionSelect)="CambioPagosSeleccionados(info.key)"></ion-radio>
 
         <ion-row>
           <ion-col>
-            Total pagado: {{ info.value[gv.cantidad_pagado] }}
+            Pagado: ${{ info.value[gv.cantidad_pagado] }}
           </ion-col>
           <ion-col>
-            Pagos faltantes: {{ info.value[gv.pagos_faltantes] }}
+            Saldo: ${{ info.value[gv.cantidad_por_pagar] }}
           </ion-col>
           <ion-col>
-            Proximos: {{ info.value[gv.status_proximo] }}
+            Pendientes: {{ info.value[gv.pagos_faltantes] }}/{{ this.ArrCreditos[info.key + gv.info][0].length }}
           </ion-col>
           <ion-col>
-            Pago faltante: {{ info.value[gv.cantidad_por_pagar] }}
+            Realizados: {{ info.value[gv.status_pagado] }}/{{ this.ArrCreditos[info.key + gv.info][0].length }}
           </ion-col>
           <ion-col>
-            Pago vencido: {{ info.value[gv.status_vencido] }}
+            Vencidos: {{ info.value[gv.status_vencido] }}
           </ion-col>
         </ion-row>
 
@@ -122,44 +123,44 @@
         </ion-col>
       </ion-row>
 
-    <div *ngIf="VerPagos">
-      <ion-row *ngFor="let pago of PagosSeleccionados">
-        <ion-col *ngIf="pago[gv.multa] !== undefined">
-          ${{ pago[gv.pago] - pago[gv.multa] }}.00
-        </ion-col>
-        <ion-col *ngIf="pago[gv.multa] === undefined">
-          ${{ pago[gv.pago] }}.00
-        </ion-col>
-        <ion-col>
-          {{ this.gf.GetYYMMDDDateFromRef(pago[gv.fecha]) }}
-        </ion-col>
-        <ion-col *ngIf="pago[gv.dia_cobro] !== undefined">
-          {{ this.gf.GetYYMMDDDateFromRef(pago[gv.dia_cobro]) }}
-        </ion-col>
-        <ion-col *ngIf="pago[gv.dia_cobro] === undefined">
-          Pendiente
-        </ion-col>
-        <ion-col *ngIf="pago[gv.multa] !== undefined">
-          ${{ pago[gv.multa] }}.00
-        </ion-col>
-        <ion-col *ngIf="pago[gv.multa] === undefined">
-          $ 00.00
-        </ion-col>
-        <ion-col>
-          ${{ pago[gv.pago] }}.00
-        </ion-col>
-        <ion-col>
-          {{ pago[gv.num_pago] }}
-        </ion-col>
-        <ion-col>
-          {{ pago[gv.cobrado_por] }}
-        </ion-col>
-        <ion-col *ngIf="pago[gv.status] === gv.status_pagado">
-          <ion-icon color="medium" name="close-circle-outline" (click)="RegresarPago(pago)">
-          </ion-icon>
-        </ion-col>
-      </ion-row>
-    </div>
+      <div *ngIf="VerPagos">
+        <ion-row *ngFor="let pago of PagosSeleccionados">
+          <ion-col *ngIf="pago[gv.multa] !== undefined">
+            ${{ pago[gv.pago] - pago[gv.multa] }}.00
+          </ion-col>
+          <ion-col *ngIf="pago[gv.multa] === undefined">
+            ${{ pago[gv.pago] }}.00
+          </ion-col>
+          <ion-col>
+            {{ this.gf.GetYYMMDDDateFromRef(pago[gv.fecha]) }}
+          </ion-col>
+          <ion-col *ngIf="pago[gv.dia_cobro] !== undefined">
+            {{ this.gf.GetYYMMDDDateFromRef(pago[gv.dia_cobro]) }}
+          </ion-col>
+          <ion-col *ngIf="pago[gv.dia_cobro] === undefined">
+            Pendiente
+          </ion-col>
+          <ion-col *ngIf="pago[gv.multa] !== undefined">
+            ${{ pago[gv.multa] }}.00
+          </ion-col>
+          <ion-col *ngIf="pago[gv.multa] === undefined">
+            $ 00.00
+          </ion-col>
+          <ion-col>
+            ${{ pago[gv.pago] }}.00
+          </ion-col>
+          <ion-col>
+            {{ pago[gv.num_pago] }}
+          </ion-col>
+          <ion-col>
+            {{ pago[gv.cobrado_por] }}
+          </ion-col>
+          <ion-col *ngIf="pago[gv.status] === gv.status_pagado">
+            <ion-icon color="medium" name="close-circle-outline" (click)="RegresarPago(pago)">
+            </ion-icon>
+          </ion-col>
+        </ion-row>
+      </div>
 
       <ion-row *ngIf="Pagos_Inicial.length === 0">
         <ion-button (click)="NuevoCredito()">Ingresar credito</ion-button>
@@ -174,6 +175,16 @@
 
   </ion-row>
 
+  <div *ngIf="Cliente[0] === undefined">
+    <ion-row *ngFor="let cliente of ListaClientes" (click)="IDCliente = cliente[gv.identificador]" (click)="BuscarCliente()">
+      <ion-col>
+        Cliente: {{ cliente[gv.identificador] }}
+      </ion-col>
 
+      <ion-col>
+        Nombre: {{ this.gf.QuitarBarraAInfo(cliente[gv.nombre]) }}
+      </ion-col>
+    </ion-row>
+  </div>
 
 </ion-content>

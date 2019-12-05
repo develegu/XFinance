@@ -12,6 +12,7 @@ import { ModalController, ActionSheetController } from '@ionic/angular';
 })
 
 export class ClientsComponent {
+  ListaClientes = [];
 
   IDCliente = '';
   Cliente = [];
@@ -46,7 +47,6 @@ export class ClientsComponent {
 
   ngOnInit() {
     this.gf.CheckLogin();
-    let fecha = new Date(1994, 10 - 1, 27)
   }
 
   iterableDiffer;
@@ -82,7 +82,17 @@ export class ClientsComponent {
 
     modal.present();
   }
+  async OpcionesDeCreditoModal() {
+    const modal = await this.modalController.create({
+      component: MyModal,
+      componentProps: {
+        type: "Pago",
+        Key_Primer_Pago: this.ArrCreditos[this.Selected + gv.info][0][0][gv.key_primer_pago]
+      }
+    });
 
+    modal.present();
+  }
   BuscarCliente() {
     this.Cliente = [];
     this.pagos_cliente = [];
@@ -125,10 +135,10 @@ export class ClientsComponent {
 
         this.ArrCreditos[this.Pagos_Inicial[x][gv.key] + gv.info] = ArrPagos;
 
-        this.PagosSeleccionados = this.ArrCreditos[this.Pagos_Inicial[x][gv.key] + gv.info][0];
 
         if (x === 0 && this.Selected === undefined) {
           this.Selected = this.Pagos_Inicial[x][gv.key];
+          this.PagosSeleccionados = this.ArrCreditos[this.Pagos_Inicial[x][gv.key] + gv.info][0];
         }
 
         this.ArrCreditos[this.Pagos_Inicial[x][gv.key]] = PagosDeCredito;
@@ -136,6 +146,14 @@ export class ClientsComponent {
     } else {
       this.Selected = undefined;
     }
+
+    this.ListaClientes = gv.clientes.filter(cliente => {
+      return this.gf.CleanAccentCaps(cliente[gv.identificador]).includes(this.gf.CleanAccentCaps(this.IDCliente)) ||
+      this.gf.CleanAccentCaps(cliente[gv.nombre]).includes(this.gf.CleanAccentCaps(this.IDCliente));
+    });
+  }
+  CambioPagosSeleccionados(key) {
+    this.PagosSeleccionados = this.ArrCreditos[key + gv.info][0];
   }
 
   CambioPagoMulta(Pago, Multa) {

@@ -45,23 +45,12 @@
       </ion-col>
       <ion-col>
         <ion-item>
-          <ion-select placeholder="Vivienda" [(ngModel)]="in.Vivienda">
-            <ion-select-option value="{{ gv.propia }}">Propia</ion-select-option>
-            <ion-select-option value="{{ gv.prestada }}">Prestada</ion-select-option>
-            <ion-select-option value="{{ gv.renta }}">Renta</ion-select-option>
+          <ion-select placeholder="Uso de credito" [(ngModel)]="in.Razon">
+            <ion-select-option value="{{ gv.inversion }}">Inversion</ion-select-option>
+            <ion-select-option value="{{ gv.consumo }}">Consumo</ion-select-option>
+            <ion-select-option value="{{ gv.deuda }}">Deuda</ion-select-option>
+            <ion-select-option value="{{ gv.ahorro }}">Ahorro</ion-select-option>
           </ion-select>
-        </ion-item>
-      </ion-col>
-      <ion-col>
-        <ion-item class="input">
-          <ion-label floating>Años</ion-label>
-          <ion-input type="number" min="0" [(ngModel)]="in.Anos_Antiguedad"></ion-input>
-        </ion-item>
-      </ion-col>
-      <ion-col>
-        <ion-item class="input">
-          <ion-label floating>Meses</ion-label>
-          <ion-input type="number" min="0" max="12" [(ngModel)]="in.Meses_Antiguedad"></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>
@@ -70,7 +59,7 @@
       <ion-col col-6>
         <ion-item class="input">
           <ion-label floating>*Efectivo: $</ion-label>
-          <ion-input type="number" [(ngModel)]="in.Efectivo"></ion-input>
+          <ion-input type="number" [(ngModel)]="in.Efectivo" (ngModelChange)='CambioCargoPorServicio()'></ion-input>
         </ion-item>
       </ion-col>
       <ion-col col-6>
@@ -100,6 +89,13 @@
         <ion-item class="input">
           <ion-label floating>Total a pagar: $</ion-label>
           <ion-textarea disabled readonly [(ngModel)]="in.Total_Credito">
+          </ion-textarea>
+        </ion-item>
+      </ion-col>
+      <ion-col col-6>
+        <ion-item class="input">
+          <ion-label floating>Cargo: $</ion-label>
+          <ion-textarea disabled readonly [(ngModel)]="in.Cargo_Servicio">
           </ion-textarea>
         </ion-item>
       </ion-col>
@@ -134,15 +130,6 @@
             <ion-select-option value="{{ gv.representante }}">Representante</ion-select-option>
             <ion-select-option value="{{ gv.oficina }}">Oficina</ion-select-option>
             <ion-select-option value="{{ gv.banco }}">Banco</ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-col>
-      <ion-col>
-        <ion-item>
-          <ion-select placeholder="Ocupacion" [(ngModel)]="in.Ocupacion">
-            <ion-select-option value="{{ gv.ama_de_casa }}">Ama de casa</ion-select-option>
-            <ion-select-option value="{{ gv.empleado }}">Empleado</ion-select-option>
-            <ion-select-option value="{{ gv.comerciante }}">Comerciante</ion-select-option>
           </ion-select>
         </ion-item>
       </ion-col>

@@ -11,7 +11,7 @@ export const gv = {
     //DATALOADED
     DT_Clientes: false,
     DT_Pagos: false,
-
+    DT_Productos: false,
 
     plan: 'plan',
 
@@ -29,6 +29,8 @@ export const gv = {
     password: 'pass',
     organizacion: 'org',
     modificado_por: 'mod_por',
+    dueno: 'Dueno', region: 'Region', zona: 'Zona', sucursal: 'Sucursal', dm: 'Encargado', agente: 'Agente',
+    tag: 'tag',
 
     //INFO CREDITOS
     pagos_Arr: [],
@@ -57,22 +59,24 @@ export const gv = {
     vivienda: 'viv', propia: 'prop', prestada: 'pres', renta: 'rent',
     antiguedad: 'ant',
     ocupacion: 'ocu', ama_de_casa: 'ama', empleado: 'emp', comerciante: 'comer',
+    razon_de_credito: 'ra_cre', inversion: 'inv', consumo: 'cons', deuda: 'deuda', ahorro: 'ahor',
+    cargo_por_servicio: 'ca_ser',
+    ID_Ubicacion: 'ID_U',
 
     //INFO USUARIOS
     usuario: {},
     colaboradores: [],
     roll: 'roll', Administrador: 'admin', Cobrador: 'cob', Oficina: 'off', Dueno: 'duen',
 
+
+    ArrProductos: [],
     info: 'info',
     Nuevo: 'nue',
     Actualizar: 'Act',
     AvalArr: [],
 
-
     ClienteToCreditoInfo: [],
 };
-
-export var ClientesSubscribe;
 
 export var estados = ["aguascalientes","baja california","baja california sur","campeche","chiapas","chihuahua","coahuila","colima",
 "ciudad de mexico","distrito federal","durango","guanajuato","guerrero","hidalgo","jalisco","estado de mexico","michoacan",

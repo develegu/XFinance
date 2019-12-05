@@ -13,7 +13,7 @@ import { gv, Estados } from '../../constants';
 export class MyModal {
   public gv = gv;
   @Input() myParam: string;
-  
+
   Estados = Estados[0];
 
   dismiss() {
@@ -32,23 +32,93 @@ export class MyModal {
 
   AlertText = '';
   btn_disabled = false;
-
   type;
   Tipo;
-
+  PermisosUsuario = [];
   ngOnInit() {
-
     if (this.type === 'Usuario') {
+      this.SepararUsuarios();
+
+      console.log(gv.usuario)
+      this.PermisosUsuario = this.gf.GetElementosDeID(gv.usuario[gv.ID_Ubicacion])
+      console.log(this.PermisosUsuario)
+
+      this.PermisosUsuario[gv.nombre] = gv.usuario[gv.nombre];
+      this.PermisosUsuario[gv.tag] = gv.usuario[gv.tag];
+
+      if (this.PermisosUsuario[gv.ID_Ubicacion] === gv.dm) {
+        console.log("dm")
+        this.ArrSel[gv.dm].push(this.PermisosUsuario);
+
+        this.Usuario.Region = this.PermisosUsuario[gv.region];
+        this.Usuario.Sucursal = this.PermisosUsuario[gv.sucursal];
+        this.Usuario.Zona = this.PermisosUsuario[gv.zona];
+        this.Usuario.DM = this.PermisosUsuario[gv.dm];
+
+        this.Roles.push({
+          [gv.agente]: gv.agente
+        })
+      } else
+        if (this.PermisosUsuario[gv.ID_Ubicacion] === gv.sucursal) {
+          console.log("Sucursal")
+          this.ArrSel[gv.sucursal].push(this.PermisosUsuario);
+
+          this.Usuario.Region = this.PermisosUsuario[gv.region];
+          this.Usuario.Sucursal = this.PermisosUsuario[gv.sucursal];
+
+          this.Roles.push({
+            [gv.agente]: gv.agente,
+            [gv.dm]: gv.dm,
+            [gv.sucursal]: gv.sucursal
+          })
+        } else
+          if (this.PermisosUsuario[gv.ID_Ubicacion] === gv.zona) {
+            console.log("zona")
+            this.ArrSel[gv.zona].push(this.PermisosUsuario);
+
+            this.Usuario.Region = this.PermisosUsuario[gv.region];
+            this.Usuario.Sucursal = this.PermisosUsuario[gv.sucursal];
+            this.Usuario.Zona = this.PermisosUsuario[gv.zona];
+
+            this.Roles.push({
+              [gv.agente]: gv.agente,
+              [gv.dm]: gv.dm
+            })
+          } else
+            if (this.PermisosUsuario[gv.ID_Ubicacion] === gv.region) {
+              console.log("Region")
+              this.ArrSel[gv.region].push(this.PermisosUsuario);
+
+              this.Usuario.Region = this.PermisosUsuario[gv.region];
+
+              this.Roles.push({
+                [gv.agente]: gv.agente,
+                [gv.dm]: gv.dm,
+                [gv.sucursal]: gv.sucursal,
+                [gv.zona]: gv.zona
+              })
+            } else
+              if (this.PermisosUsuario[gv.ID_Ubicacion] === gv.dueno) {
+                console.log("dueno")
+
+                this.Roles.push({
+                  [gv.agente]: gv.agente,
+                  [gv.dm]: gv.dm,
+                  [gv.sucursal]: gv.sucursal,
+                  [gv.zona]: gv.zona,
+                  [gv.region]: gv.region
+                })
+              }
+
+      this.GetOpciones();
+
       this.Usuario.Organizacion = gv.usuario[gv.organizacion];
 
       if (this.Tipo === gv.Actualizar) {
-        this.Usuario.Mail = this.Mod_Usuario[gv.mail]
-        this.Usuario.Nombre = this.Mod_Usuario[gv.nombre]
-        this.Usuario.Roll = this.Mod_Usuario[gv.roll]
+        this.Usuario.Mail = this.Mod_Usuario[gv.mail];
+        this.Usuario.Nombre = this.Mod_Usuario[gv.nombre];
+        this.Usuario.Roll = this.Mod_Usuario[gv.roll];
       }
-
-    } else {
-
     }
 
     if (this.type === 'Cliente' && this.Tipo === gv.Actualizar) {
@@ -98,7 +168,6 @@ export class MyModal {
 
     }
   }
-
   closeModal() {
     // using the injected ModalController this page
     // can "dismiss" itself and optionally pass back data
@@ -116,8 +185,17 @@ export class MyModal {
     Contrasena: '',
     Confirmar: '',
     Roll: '',
-    Organizacion: ''
+    Organizacion: '',
+
+    Region: 0,
+    Zona: 0,
+    Sucursal: 0,
+    DM: 0,
+    AG: 0,
+
+    Etiqueta: ''
   }
+  Roles = [];
 
   AgregarUsuario() {
     if (this.Usuario.Mail === '') {
@@ -126,14 +204,243 @@ export class MyModal {
       return;
     }
 
-    this.gf.CrearCollaborador(this.Usuario.Nombre, this.Usuario.Roll,
-      this.Usuario.Contrasena, this.Usuario.Mail, this.Usuario.Organizacion)
-      .then(res => {
-        this.closeModal();
+    if (this.Tipo === gv.Actualizar) {
+      this.gf.ActualizarCollaborador(this.Mod_Usuario[gv.key], this.Usuario.Nombre, this.Usuario.Mail, this.Usuario.Organizacion,
+        parseInt(this.gf.GetID(this.Usuario.Region, this.Usuario.Zona, this.Usuario.Sucursal, this.Usuario.DM, this.Usuario.AG)),
+        this.Usuario.Etiqueta)
+        .then(res => {
+          this.closeModal();
+        })
+        .catch(err => {
+          this.closeModal();
+        });
+
+    } else {
+      if (this.Usuario.Region === null) {
+        this.Usuario.Region = 1;
+      }
+      if (this.Usuario.Zona === null) {
+        this.Usuario.Zona = 0;
+      }
+      if (this.Usuario.Sucursal === null) {
+        this.Usuario.Sucursal = 0;
+      }
+      if (this.Usuario.DM === null) {
+        this.Usuario.DM = 0;
+      }
+      if (this.Usuario.AG === null) {
+        this.Usuario.AG = 0;
+      }
+
+      this.gf.CrearCollaborador(this.Usuario.Nombre, this.Usuario.Contrasena, this.Usuario.Mail, this.Usuario.Organizacion,
+        parseInt(this.gf.GetID(this.Usuario.Region, this.Usuario.Zona, this.Usuario.Sucursal, this.Usuario.DM, this.Usuario.AG)),
+        this.Usuario.Etiqueta)
+        .then(res => {
+          this.closeModal();
+        })
+        .catch(err => {
+          this.closeModal();
+        });
+    }
+  }
+  //CUANDO SELECCIONAN ALGUNA OPCION DE ID
+  IDSelected(selected) {
+    this.GetOpciones();
+
+    if (selected === gv.region) {
+      this.Usuario.Zona = 0;
+      this.Usuario.Sucursal = 0;
+      this.Usuario.DM = 0;
+      this.Usuario.AG = 0;
+    } else
+      if (selected === gv.zona) {
+        this.Usuario.Sucursal = 0;
+        this.Usuario.DM = 0;
+        this.Usuario.AG = 0;
+        console.log("Zona seleccionada")
+      } else
+        if (selected === gv.sucursal) {
+          this.Usuario.DM = 0;
+          this.Usuario.AG = 0;
+        } else
+          if (selected === gv.dm) {
+            this.Usuario.AG = 0;
+          }
+  }
+  //SETTER LAS OPCIONES DISPONIBLES PARA CADA CAMPO
+  GetOpciones() {
+    this.ArrSel[gv.zona] = this.ArrUsers[gv.zona].filter(cliente => {
+      return cliente[gv.region] === this.Usuario.Region;
+    });
+    this.ArrSel[gv.sucursal] = this.ArrUsers[gv.sucursal].filter(cliente => {
+      return cliente[gv.zona] === this.Usuario.Zona &&
+        cliente[gv.region] === this.Usuario.Region;
+    });
+    this.ArrSel[gv.dm] = this.ArrUsers[gv.dm].filter(cliente => {
+      return cliente[gv.sucursal] === this.Usuario.Sucursal &&
+        cliente[gv.region] === this.Usuario.Region &&
+        cliente[gv.zona] === this.Usuario.Zona;
+    });
+    this.ArrSel[gv.agente] = this.ArrUsers[gv.agente].filter(cliente => {
+      return cliente[gv.dm] === this.Usuario.DM &&
+        cliente[gv.region] === this.Usuario.Region &&
+        cliente[gv.zona] === this.Usuario.Zona &&
+        cliente[gv.sucursal] === this.Usuario.Sucursal;
+    });
+
+    if (this.ArrSel[gv.zona].length === 0 && this.Usuario.Roll !== gv.zona) {
+      this.ArrSel[gv.zona].push({
+        [gv.nombre]: "Zona",
+        [gv.zona]: 1
       })
-      .catch(err => {
-        this.closeModal();
-      });
+    }
+    if (this.ArrSel[gv.sucursal].length === 0 && this.Usuario.Roll !== gv.sucursal) {
+      this.ArrSel[gv.sucursal].push({
+        [gv.nombre]: "Sucursal",
+        [gv.sucursal]: 1
+      })
+    }
+    if (this.ArrSel[gv.dm].length === 0 && this.Usuario.Roll !== gv.dm) {
+      this.ArrSel[gv.dm].push({
+        [gv.nombre]: "Gerente",
+        [gv.dm]: 1
+      })
+    }
+    console.log(this.ArrSel)
+
+    if (this.Usuario.Roll === gv.region) {
+      this.ArrSel[gv.agente] = [];
+      this.ArrSel[gv.dm] = [];
+      this.ArrSel[gv.sucursal] = [];
+      this.ArrSel[gv.zona] = [];
+
+      this.Usuario.AG = 0;
+      this.Usuario.DM = 0;
+      this.Usuario.Sucursal = 0;
+      this.Usuario.Zona = 0;
+
+    } else
+      if (this.Usuario.Roll === gv.zona) {
+
+        let proximo = 1;
+        if (this.ArrSel[gv.zona].length !== 0) {
+          this.ArrSel[gv.zona].sort((a, b) => { return a[gv.zona] - b[gv.zona] });
+          proximo = this.ArrSel[gv.zona][this.ArrSel[gv.zona].length - 1][gv.zona] + 1;
+          this.Usuario.Zona = proximo;
+          this.ArrSel[gv.zona] = [];
+        }
+
+        this.ArrSel[gv.agente] = [];
+        this.ArrSel[gv.dm] = [];
+        this.ArrSel[gv.sucursal] = [];
+
+        this.Usuario.AG = 0;
+        this.Usuario.DM = 0;
+        this.Usuario.Sucursal = 0;
+
+        this.ArrSel[gv.zona].push({
+          [gv.nombre]: "Proxima zona",
+          [gv.zona]: proximo
+        });
+
+      } else
+        if (this.Usuario.Roll === gv.sucursal) {
+          let proximo = 1;
+
+          if (this.ArrSel[gv.sucursal].length !== 0) {
+            this.ArrSel[gv.sucursal].sort((a, b) => { return a[gv.sucursal] - b[gv.sucursal] });
+
+            let proximo = this.ArrSel[gv.sucursal][this.ArrSel[gv.sucursal].length - 1][gv.sucursal] + 1;
+            this.Usuario.Sucursal = proximo;
+            this.ArrSel[gv.sucursal] = [];
+          }
+          this.ArrSel[gv.agente] = [];
+          this.ArrSel[gv.dm] = [];
+
+          this.Usuario.AG = 0;
+          this.Usuario.DM = 0;
+
+          this.ArrSel[gv.sucursal].push({
+            [gv.nombre]: "Proxima sucursal",
+            [gv.sucursal]: proximo,
+            [gv.info]: gv.Nuevo
+          });
+
+        } else
+          if (this.Usuario.Roll === gv.dm) {
+            let proximo = 1;
+            if (this.ArrSel[gv.dm].length !== 0) {
+              this.ArrSel[gv.dm].sort((a, b) => { return a[gv.dm] - b[gv.dm] });
+              proximo = this.ArrSel[gv.dm][this.ArrSel[gv.dm].length - 1][gv.dm] + 1;
+              this.Usuario.AG = proximo;
+              this.ArrSel[gv.dm] = [];
+            }
+            this.ArrSel[gv.agente] = [];
+            this.Usuario.AG = 0;
+
+            this.ArrSel[gv.dm].push({
+              [gv.nombre]: "Proximo gerente",
+              [gv.dm]: proximo
+            });
+          } else
+            if (this.Usuario.Roll === gv.agente) {
+              let proximo = 1;
+              if (this.ArrSel[gv.agente].length !== 0) {
+                this.ArrSel[gv.agente].sort((a, b) => { return a[gv.agente] - b[gv.agente] });
+                proximo = this.ArrSel[gv.agente][this.ArrSel[gv.agente].length - 1][gv.agente] + 1;
+                this.Usuario.AG = proximo;
+                this.ArrSel[gv.agente] = [];
+              }
+              this.ArrSel[gv.agente] = [];
+
+              this.ArrSel[gv.agente].push({
+                [gv.nombre]: "Proximo agente",
+                [gv.agente]: proximo
+              });
+            }
+  }
+  ArrSel = {
+    [gv.region]: [],
+    [gv.zona]: [],
+    [gv.sucursal]: [],
+    [gv.dm]: [],
+    [gv.agente]: [],
+  };
+  ArrUsers = {
+    [gv.region]: [],
+    [gv.zona]: [],
+    [gv.sucursal]: [],
+    [gv.dm]: [],
+    [gv.agente]: [],
+  };
+  SepararUsuarios() {
+    for (let x = 0; x < gv.colaboradores.length; x++) {
+      let Elementos_ID = this.gf.GetElementosDeID(gv.colaboradores[x][gv.ID_Ubicacion]);
+      Elementos_ID[gv.nombre] = gv.colaboradores[x][gv.nombre];
+      Elementos_ID[gv.tag] = gv.colaboradores[x][gv.tag];
+
+      if (Elementos_ID[gv.ID_Ubicacion] === gv.region) {
+        this.ArrUsers[gv.region].push(Elementos_ID);
+
+      } else
+        if (Elementos_ID[gv.ID_Ubicacion] === gv.zona) {
+          this.ArrUsers[gv.zona].push(Elementos_ID);
+
+        } else
+          if (Elementos_ID[gv.ID_Ubicacion] === gv.sucursal) {
+            this.ArrUsers[gv.sucursal].push(Elementos_ID);
+
+          } else
+            if (Elementos_ID[gv.ID_Ubicacion] === gv.dm) {
+              this.ArrUsers[gv.dm].push(Elementos_ID);
+
+            } else
+              if (Elementos_ID[gv.ID_Ubicacion] === gv.agente) {
+                this.ArrUsers[gv.agente].push(Elementos_ID);
+              }
+      console.log("Usuarios separados")
+      console.log(this.ArrUsers);
+    }
   }
 
   //CLIENTES
@@ -155,12 +462,14 @@ export class MyModal {
     Sector: '',
     CP: '',
     Identificador: '',
+
+    ID_Ubicacion: '',
   }
   Incomplete = false;
   Info_Cliente;
-  GetCurp(){
-    if(this.Cliente.ApellidoP !== '' && this.Cliente.ApellidoM !== '' && this.Cliente.Nombre !== '' && 
-    this.Cliente.Sexo !== '' && this.Cliente.Cumpleanos !== '' && this.Cliente.Edo_Nacimiento !== ''){
+  GetCurp() {
+    if (this.Cliente.ApellidoP !== '' && this.Cliente.ApellidoM !== '' && this.Cliente.Nombre !== '' &&
+      this.Cliente.Sexo !== '' && this.Cliente.Cumpleanos !== '' && this.Cliente.Edo_Nacimiento !== '') {
       let fecha = new Date(this.Cliente.Cumpleanos)
 
       this.Cliente.CURP = this.gf.GetCURP(this.Cliente.ApellidoP, this.Cliente.ApellidoM, this.Cliente.Nombre,
@@ -168,8 +477,8 @@ export class MyModal {
     }
 
   }
-
   AgregarClientes() {
+
     this.Incomplete = false;
     this.btn_disabled = true;
 
@@ -184,7 +493,7 @@ export class MyModal {
       return cliente[gv.identificador] === this.Cliente.Identificador;
     });
 
-    if(!gv.DT_Clientes){
+    if (!gv.DT_Clientes) {
       this.Incomplete = true;
       this.AlertText = "Espera a que carguen los usuarios";
       this.btn_disabled = false;
@@ -207,12 +516,6 @@ export class MyModal {
     if (this.Cliente.ApellidoP === '') {
       this.Incomplete = true;
       this.AlertText = "Ingresa un apellido paterno";
-      this.btn_disabled = false;
-      return;
-    }
-    if (this.Cliente.ApellidoM === '') {
-      this.Incomplete = true;
-      this.AlertText = "Ingresa un apellido materno";
       this.btn_disabled = false;
       return;
     }
@@ -279,6 +582,9 @@ export class MyModal {
       return;
     }
 
+    if (this.Cliente.ApellidoM === '') {
+      this.Cliente.ApellidoM = ' ';
+    }
     if (this.Cliente.NumeroInt === '') {
       this.Cliente.NumeroInt = ' ';
     }
@@ -286,7 +592,8 @@ export class MyModal {
     this.gf.NuevoCliente(this.Cliente.Nombre + '#' + this.Cliente.ApellidoP + '#' + this.Cliente.ApellidoM,
       this.Cliente.Calle + '#' + this.Cliente.NumeroExt + '#' + this.Cliente.NumeroInt + '#' + this.Cliente.Colonia + '#' +
       this.Cliente.Municipio + '#' + this.Cliente.Estado + '#' + this.Cliente.CP,
-      this.Cliente.Telefono, this.Cliente.CURP, this.Cliente.Cumpleanos, this.Cliente.Sexo, this.Cliente.Identificador)
+      this.Cliente.Telefono, this.Cliente.CURP, this.Cliente.Cumpleanos, this.Cliente.Sexo, this.Cliente.Identificador,
+      parseInt(this.Cliente.ID_Ubicacion))
       .then(res => {
         if (res) {
           this.closeModal();
@@ -294,6 +601,10 @@ export class MyModal {
 
         }
       })
+  }
+  ChecEncargado() {
+    console.log(this.Cliente.ID_Ubicacion)
+    console.log(gv.colaboradores)
   }
 
   //PAGOS
@@ -323,7 +634,6 @@ export class MyModal {
   Key_Primer_Pago;
   Selection = 'Posponer';
   Btn_Txt = 'Posponer';
-
   Cambio() {
     switch (this.Selection) {
       case 'Posponer':
@@ -343,7 +653,6 @@ export class MyModal {
         break;
     }
   }
-
   PayCredit() {
     this.Incomplete = false;
     this.btn_disabled = true;
@@ -506,13 +815,10 @@ export class MyModal {
     Efectivo: '',
     Periodo: '',
   }
-
-  AgregarProducto(){
-    this.gf.AgregarProducto(parseInt(this.Producto.Credito), parseInt(this.Producto.Total_Pagos), this.Producto.Periodo, parseInt(this.Producto.Pago), 
-    this.Producto.Total_Credito, parseInt(this.Producto.Efectivo));
-
+  AgregarProducto() {
+    this.gf.AgregarProducto(parseInt(this.Producto.Credito), parseInt(this.Producto.Total_Pagos), this.Producto.Periodo, parseInt(this.Producto.Pago),
+      this.Producto.Total_Credito, parseInt(this.Producto.Efectivo));
   }
-
   CambioPagoNum(Pago, Num_Pagos) {
     if (Pago === '') {
       Pago = '0';

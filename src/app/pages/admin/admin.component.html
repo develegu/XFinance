@@ -22,10 +22,12 @@
     <ion-col>
       {{ user[gv.roll] }}
     </ion-col>
+    <ion-col>
+      {{ user[gv.tag] }}
+    </ion-col>
 
     <ion-col>
-      <ion-icon color="medium" name="close-circle-outline"
-        (click)="this.gf.EliminateCollaboratorAlert(user, user['key'])">
+      <ion-icon color="medium" name="close-circle-outline">
       </ion-icon>
     </ion-col>
   </ion-row>
@@ -34,17 +36,13 @@
     <ion-button (click)="AgregarProducto()">Nuevo producto</ion-button>
   </ion-col>
 
-  <ion-row *ngFor="let user of gv.colaboradores">
-    <ion-col (click)="ModificarUsuarioModal(user)">
-      {{ user[gv.nombre] }}
-    </ion-col>
+  <ion-row *ngFor="let producto of gv.ArrProductos">
     <ion-col>
-      {{ user[gv.roll] }}
+      ${{ producto[gv.credito] }}: {{ producto[gv.total_pagos] }} ({{ producto[gv.periodo] }})
     </ion-col>
 
     <ion-col>
-      <ion-icon color="medium" name="close-circle-outline"
-        (click)="this.gf.EliminateCollaboratorAlert(user, user['key'])">
+      <ion-icon color="medium" name="close-circle-outline">
       </ion-icon>
     </ion-col>
   </ion-row>

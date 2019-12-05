@@ -73,13 +73,13 @@ export class CreditComponent {
     Deposito: '',
     Folio: '',
     Producto: '',
-    Vivienda: '',
-    Anos_Antiguedad: '',
-    Meses_Antiguedad: '',
-    Ocupacion: ''
+    Cargo_Servicio: 0,
+    Cargo_Pago: 0,
+    Razon: ''
   }
 
   ngOnInit() {
+    this.ArrProductos = gv.ArrProductos;
     this.gf.CheckLogin();
 
     if (gv.ClienteToCreditoInfo.length !== 0) {
@@ -88,15 +88,6 @@ export class CreditComponent {
       this.in.IDCliente = gv.ClienteToCreditoInfo[0][gv.identificador];
       gv.ClienteToCreditoInfo = [];
     }
-
-    this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Productos)
-      .get().subscribe(serverItems => {
-
-        serverItems.forEach((product) => {
-          this.ArrProductos.push(product.data())
-          console.log(product.data())
-        });
-      });
   }
 
   GetClient() {
@@ -130,6 +121,9 @@ export class CreditComponent {
   }
 
   AgregarCredito() {
+    this.Alerta = false;
+    this.Btn_Desactivado = true;
+
     for (let x = 0; x < this.ArrGarantias.length; x++) {
       if (this.ArrGarantias[x][gv.articulo] === '' || this.ArrGarantias[x][gv.marca] === '' || this.ArrGarantias[x][gv.identificador] === '') {
         this.Alerta = true;
@@ -138,10 +132,6 @@ export class CreditComponent {
         return;
       }
     }
-
-    this.Alerta = false;
-    this.Btn_Desactivado = true;
-
     if (this.in.IDCliente === '') {
       this.Alerta = true;
       this.AlertMsj = 'Ingresa numero de cliente';
@@ -151,6 +141,18 @@ export class CreditComponent {
     if (this.in.Folio === '') {
       this.Alerta = true;
       this.AlertMsj = 'Ingresa numero de folio';
+      this.Btn_Desactivado = false;
+      return;
+    }
+    if (!gv.DT_Pagos) {
+      this.Alerta = true;
+      this.AlertMsj = 'Espera a que carguen los pagos';
+      this.Btn_Desactivado = false;
+      return;
+    }
+    if (this.gf.BuscarCreditoPorFolio(this.in.Folio).length !== 0) {
+      this.Alerta = true;
+      this.AlertMsj = 'Ya hay un credito con ese folio';
       this.Btn_Desactivado = false;
       return;
     }
@@ -202,6 +204,12 @@ export class CreditComponent {
       this.Btn_Desactivado = false;
       return;
     }
+    if (this.in.Razon === '') {
+      this.Alerta = true;
+      this.AlertMsj = 'Ingresa el uso del credito';
+      this.Btn_Desactivado = false;
+      return;
+    }
 
     if (isNaN(parseInt(this.in.Efectivo))) {
       this.Alerta = true;
@@ -237,8 +245,8 @@ export class CreditComponent {
 
     this.gf.RegistratCredito(parseInt(this.in.Num_Pagos), this.cliente[gv.nombre], this.cliente[gv.key], parseInt(this.in.Credito),
       this.in.Fecha, this.in.Periodo, parseInt(this.in.Pago), this.in.IDCliente, parseInt(this.in.Efectivo),
-      this.in.Total_Credito, this.in.Deposito, this.in.Horario, this.ArrGarantias, this.in.Folio, this.in.Vivienda, 
-      this.in.Anos_Antiguedad + ' año(s), ' + this.in.Meses_Antiguedad + ' mes(es)', this.in.Ocupacion, gv.AvalArr)
+      this.in.Total_Credito, this.in.Deposito, this.in.Horario, this.ArrGarantias, this.in.Folio, gv.AvalArr, this.in.Razon, 
+      this.in.Cargo_Pago, this.cliente[gv.ID_Ubicacion])
       .then(res => {
         if (res) {
           this.gf.Toast('Credito registrado', 2000)
@@ -255,10 +263,9 @@ export class CreditComponent {
           this.in.Deposito = '';
           this.in.Horario = '';
           this.in.Folio = '';
-          this.in.Vivienda = '';
-          this.in.Anos_Antiguedad = '';
-          this.in.Meses_Antiguedad = '';
-          this.in.Ocupacion = '';
+          this.in.Cargo_Pago = 0;
+          this.in.Total_Credito = 0;
+          this.in.Cargo_Servicio = 0;
           gv.AvalArr = [];
           this.ArrProductos = [];
         } else {
@@ -279,8 +286,32 @@ export class CreditComponent {
     }
 
     this.in.Total_Credito = parseInt(Pago) * parseInt(Num_Pagos);
+    this.CambioCargoPorServicio();
   }
-  /*
+
+  CambioCargoPorServicio(){
+    if (this.in.Efectivo === '') {
+      this.in.Efectivo = '0';
+    }
+
+    this.in.Cargo_Servicio = this.in.Total_Credito - parseInt(this.in.Efectivo);
+    this.in.Cargo_Pago = this.in.Cargo_Servicio/parseInt(this.in.Num_Pagos);
+  }
+
+  ProductoSeleccionado() {
+    this.in.Num_Pagos = this.ArrProductos[this.in.Producto][gv.total_pagos];
+    this.in.Credito = this.ArrProductos[this.in.Producto][gv.credito];
+    this.in.Pago = this.ArrProductos[this.in.Producto][gv.pago];
+    this.in.Total_Credito = this.ArrProductos[this.in.Producto][gv.total_credito];
+    this.in.Periodo = this.ArrProductos[this.in.Producto][gv.periodo];
+    this.in.Efectivo = this.ArrProductos[this.in.Producto][gv.efectivo];
+  }
+
+}
+
+/*
+    <input type='file' (change)="handleFileSelect($event)">
+
     parseExcel = function (file) {
       var reader = new FileReader();
   
@@ -318,22 +349,3 @@ export class CreditComponent {
       this.parseExcel(files[0]);
     }
     */
-
-  ProductoSeleccionado() {
-    console.log("producto")
-    console.log(this.ArrProductos[this.in.Producto])
-    this.in.Num_Pagos = this.ArrProductos[this.in.Producto][gv.total_pagos];
-    this.in.Credito = this.ArrProductos[this.in.Producto][gv.credito];
-    this.in.Pago = this.ArrProductos[this.in.Producto][gv.pago];
-    this.in.Total_Credito = this.ArrProductos[this.in.Producto][gv.total_credito];
-    this.in.Periodo = this.ArrProductos[this.in.Producto][gv.periodo];
-    this.in.Efectivo = this.ArrProductos[this.in.Producto][gv.efectivo];
-    console.log(this.in)
-  }
-
-}
-
-/*
-    <input type='file' (change)="handleFileSelect($event)">
-
-*/

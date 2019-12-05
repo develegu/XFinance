@@ -59,10 +59,11 @@ export class LoginComponent {
 
         this.db.collection(gv.FB_Usuarios).doc(user_return.user.uid).get().subscribe(serverItems => {
           console.log("Search")
-          console.log(serverItems.data())
-          serverItems.data()[gv.key] = user_return.user.uid;
-          this.localStorage.set('user', serverItems.data());
           gv.usuario = serverItems.data();
+          gv.usuario[gv.key] = user_return.user.uid;
+
+          console.log(gv.usuario[gv.key])
+          this.localStorage.set('user', gv.usuario);
 
           this.login = {
             email: '',

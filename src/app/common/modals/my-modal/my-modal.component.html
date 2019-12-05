@@ -1,6 +1,63 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>{{ type }}</ion-title>
+    <ion-row *ngIf="type === 'Usuario'">
+      <ion-col>
+        <ion-select placeholder="Region" interface="action-sheet" [(ngModel)]="Usuario.Region"
+          (ngModelChange)='IDSelected(gv.region)'>
+          <ion-select-option [value]="Colaborador[gv.region]" *ngFor="let Colaborador of ArrSel[gv.region]">
+            {{ Colaborador[gv.nombre] }}: {{ Colaborador[gv.tag] }} ({{ Colaborador[gv.region] }})
+          </ion-select-option>
+        </ion-select>
+      </ion-col>
+
+      <ion-col>
+        <ion-select placeholder="Zona" interface="action-sheet" [(ngModel)]="Usuario.Zona"
+          (ngModelChange)='IDSelected(gv.zona)'>
+          <ion-select-option [value]="Colaborador[gv.zona]" *ngFor="let Colaborador of ArrSel[gv.zona]">
+            {{ Colaborador[gv.nombre] }}: {{ Colaborador[gv.tag] }} ({{ Colaborador[gv.zona] }})
+          </ion-select-option>
+        </ion-select>
+      </ion-col>
+
+      <ion-col>
+        <ion-select placeholder="Sucursal" interface="action-sheet" [(ngModel)]="Usuario.Sucursal"
+          (ngModelChange)='IDSelected(gv.sucursal)'>
+          <ion-select-option [value]="Colaborador[gv.sucursal]" *ngFor="let Colaborador of ArrSel[gv.sucursal]">
+            {{ Colaborador[gv.nombre] }}: {{ Colaborador[gv.tag] }} ({{ Colaborador[gv.sucursal] }})
+          </ion-select-option>
+        </ion-select>
+      </ion-col>
+
+      <ion-col>
+        <ion-select placeholder="Encargado" interface="action-sheet" [(ngModel)]="Usuario.DM"
+          (ngModelChange)='IDSelected(gv.dm)'>
+          <ion-select-option [value]="Colaborador[gv.dm]" *ngFor="let Colaborador of ArrSel[gv.dm]">
+            {{ Colaborador[gv.nombre] }}: {{ Colaborador[gv.tag] }} ({{ Colaborador[gv.dm] }})
+          </ion-select-option>
+        </ion-select>
+      </ion-col>
+
+      <ion-col>
+        <ion-select placeholder="Agente" interface="action-sheet" [(ngModel)]="Usuario.AG"
+          (ngModelChange)='IDSelected(gv.agente)'>
+          <ion-select-option [value]="Colaborador[gv.agente]" *ngFor="let Colaborador of ArrSel[gv.agente]">
+            {{ Colaborador[gv.nombre] }}: {{ Colaborador[gv.tag] }} ({{ Colaborador[gv.agente] }})
+          </ion-select-option>
+        </ion-select>
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="type === 'Cliente'">
+      <ion-col>
+        <ion-select placeholder="Encargado" interface="action-sheet" [(ngModel)]="Cliente.ID_Ubicacion" (ngModelChange)='ChecEncargado()'>
+          <ion-select-option value="{{ Colaborador[gv.ID_Ubicacion] }}" *ngFor="let Colaborador of gv.colaboradores">
+            {{ Colaborador[gv.nombre] }} Roll: {{ Colaborador[gv.roll] }}
+          </ion-select-option>
+        </ion-select>
+      </ion-col>
+    </ion-row>
+
   </ion-toolbar>
 </ion-header>
 
@@ -44,6 +101,7 @@
         </ion-select>
       </ion-col>
     </ion-row>
+
     <ion-row>
       <ion-col>
         <ion-input placeholder="CURP" [(ngModel)]="Cliente.CURP">
@@ -236,17 +294,24 @@
         <ion-input placeholder="Mail" [(ngModel)]="Usuario.Mail">
         </ion-input>
       </ion-col>
+      <ion-col>
+        <ion-input placeholder="Etiqueta" [(ngModel)]="Usuario.Etiqueta">
+        </ion-input>
+      </ion-col>
     </ion-row>
 
     <ion-row>
-      <ion-item>
+      <ion-col>
         <ion-label>Seleccionar</ion-label>
-        <ion-select [(ngModel)]="Usuario.Roll" placeholder="Roll">
-          <ion-select-option value="{{ gv.Administrador }}">Administrador</ion-select-option>
-          <ion-select-option value="{{ gv.Cobrador }}">Cobrador</ion-select-option>
-          <ion-select-option value="{{ gv.Oficina }}">Oficina</ion-select-option>
+
+        <ion-select placeholder="Roll" interface="action-sheet" [(ngModel)]="Usuario.Roll"
+          (ngModelChange)='GetOpciones()'>
+
+          <ion-select-option value="{{ roll.value }}" *ngFor="let roll of Roles[0] | keyvalue">{{ roll.key }}
+          </ion-select-option>
+
         </ion-select>
-      </ion-item>
+      </ion-col>
 
       <ion-col>
         <ion-input disabled readonly placeholder="Organizacion" [(ngModel)]="Usuario.Organizacion">
@@ -406,7 +471,7 @@
           (ngModelChange)='CambioPagoNum(Producto.Pago, Producto.Total_Pagos)'></ion-input>
       </ion-col>
       <ion-col>
-        <ion-textarea disabled readonly  placeholder="Total a pagar" [(ngModel)]="Producto.Total_Credito">
+        <ion-textarea disabled readonly placeholder="Total a pagar" [(ngModel)]="Producto.Total_Credito">
         </ion-textarea>
       </ion-col>
     </ion-row>
