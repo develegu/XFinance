@@ -35,6 +35,7 @@ export class MyModal {
   type;
   Tipo;
   PermisosUsuario = [];
+  Agentes;
   ngOnInit() {
     if (this.type === 'Usuario') {
       this.SepararUsuarios();
@@ -121,29 +122,40 @@ export class MyModal {
       }
     }
 
-    if (this.type === 'Cliente' && this.Tipo === gv.Actualizar) {
-      console.log(this.Info_Cliente)
-      let ArrNombre = this.Info_Cliente[gv.nombre].split('_');
-      console.log(ArrNombre);
-      this.Cliente.Nombre = ArrNombre[0];
-      this.Cliente.ApellidoP = ArrNombre[1];
-      this.Cliente.ApellidoM = ArrNombre[2];
+    if (this.type === 'Cliente') {
 
-      let ArrDireccion = this.Info_Cliente[gv.direccion].split('_');
-      console.log(ArrDireccion);
-      this.Cliente.Calle = ArrDireccion[0];
-      this.Cliente.NumeroInt = ArrDireccion[1];
-      this.Cliente.NumeroExt = ArrDireccion[2];
-      this.Cliente.Colonia = ArrDireccion[3];
-      this.Cliente.Municipio = ArrDireccion[4];
-      this.Cliente.Estado = ArrDireccion[5];
-      this.Cliente.CP = ArrDireccion[6];
+      this.Agentes = gv.colaboradores.filter(col => {
+        return this.gf.GetElementosDeID(col[gv.ID_Ubicacion])[gv.ID_Ubicacion] === gv.agente;
+      });
 
-      this.Cliente.Sexo = this.Info_Cliente[gv.sexo];
-      this.Cliente.Identificador = this.Info_Cliente[gv.identificador];
-      this.Cliente.Cumpleanos = this.Info_Cliente[gv.fecha];
-      this.Cliente.Telefono = this.Info_Cliente[gv.telefono];
-      this.Cliente.CURP = this.Info_Cliente[gv.curp];
+      if (this.Tipo === gv.Actualizar) {
+
+        console.log(this.Info_Cliente)
+        let ArrNombre = this.Info_Cliente[gv.nombre].split('#');
+        this.Cliente.Nombre = ArrNombre[0];
+        this.Cliente.ApellidoP = ArrNombre[1];
+        this.Cliente.ApellidoM = ArrNombre[2];
+
+        let ArrDireccion = this.Info_Cliente[gv.direccion].split('#');
+        this.Cliente.Calle = ArrDireccion[0];
+        this.Cliente.NumeroInt = ArrDireccion[1];
+        this.Cliente.NumeroExt = ArrDireccion[2];
+        this.Cliente.Colonia = ArrDireccion[3];
+        this.Cliente.Municipio = ArrDireccion[4];
+        this.Cliente.Estado = ArrDireccion[5];
+        this.Cliente.CP = ArrDireccion[6];
+
+        this.Cliente.Sexo = this.Info_Cliente[gv.sexo];
+        this.Cliente.Identificador = this.Info_Cliente[gv.identificador];
+        this.Cliente.ID_Ubicacion = this.Info_Cliente[gv.ID_Ubicacion].toString();
+        let fecha = new Date(this.Info_Cliente[gv.nacimiento]);
+        this.Cliente.Cumpleanos = fecha.toISOString();
+        this.Cliente.Telefono = this.Info_Cliente[gv.telefono];
+        this.Cliente.CURP = this.Info_Cliente[gv.curp];
+        this.Cliente.Edo_Nacimiento = this.Info_Cliente[gv.curp][11] + this.Info_Cliente[gv.curp][12];
+
+      }
+      console.log(this.Cliente.ID_Ubicacion)
 
     }
 
@@ -442,6 +454,35 @@ export class MyModal {
       console.log(this.ArrUsers);
     }
   }
+  GetRolesActivos(roll) {
+    if (roll === gv.agente && this.Usuario.Roll === gv.agente) {
+      return true;
+    }
+
+    if (roll === gv.dm && (this.Usuario.Roll === gv.dm || this.Usuario.Roll === gv.agente)) {
+      return true;
+    }
+
+    if (roll === gv.sucursal && (this.Usuario.Roll === gv.dm || this.Usuario.Roll === gv.agente || this.Usuario.Roll === gv.sucursal)) {
+      return true;
+    }
+
+    if (roll === gv.zona && (this.Usuario.Roll === gv.dm || this.Usuario.Roll === gv.agente || this.Usuario.Roll === gv.sucursal
+      || this.Usuario.Roll === gv.zona)) {
+      return true;
+    }
+
+    if (roll === gv.region && (this.Usuario.Roll === gv.dm || this.Usuario.Roll === gv.agente || this.Usuario.Roll === gv.sucursal
+      || this.Usuario.Roll === gv.zona || this.Usuario.Roll === gv.region)) {
+      return true;
+    }
+
+    if (gv.usuario[gv.roll] === gv.dueno) {
+      return true;
+    }
+
+    return false;
+  }
 
   //CLIENTES
   Cliente = {
@@ -456,6 +497,7 @@ export class MyModal {
     Estado: '',
     Telefono: '',
     CURP: '',
+    CURP_Calc: '',
     Cumpleanos: '',
     Sexo: '',
     Edo_Nacimiento: '',
@@ -469,18 +511,24 @@ export class MyModal {
   Info_Cliente;
   GetCurp() {
     if (this.Cliente.ApellidoP !== '' && this.Cliente.ApellidoM !== '' && this.Cliente.Nombre !== '' &&
-      this.Cliente.Sexo !== '' && this.Cliente.Cumpleanos !== '' && this.Cliente.Edo_Nacimiento !== '') {
+      this.Cliente.Sexo !== '' //&& this.Cliente.Cumpleanos !== '' 
+      && this.Cliente.Edo_Nacimiento !== '') {
       let fecha = new Date(this.Cliente.Cumpleanos)
 
-      this.Cliente.CURP = this.gf.GetCURP(this.Cliente.ApellidoP, this.Cliente.ApellidoM, this.Cliente.Nombre,
+      this.Cliente.CURP_Calc = this.gf.GetCURP(this.Cliente.ApellidoP, this.Cliente.ApellidoM, this.Cliente.Nombre,
         fecha, this.Cliente.Sexo.charAt(0), this.Cliente.Edo_Nacimiento)
     }
 
   }
   AgregarClientes() {
-
+    this.AlertText = '';
     this.Incomplete = false;
     this.btn_disabled = true;
+
+    this.AlertText = '';
+    this.Incomplete = false;
+    this.btn_disabled = false;
+
 
     if (this.Cliente.Identificador === '') {
       this.Incomplete = true;
@@ -488,6 +536,7 @@ export class MyModal {
       this.btn_disabled = false;
       return;
     }
+
 
     let cliente = gv.clientes.filter(cliente => {
       return cliente[gv.identificador] === this.Cliente.Identificador;
@@ -516,6 +565,44 @@ export class MyModal {
     if (this.Cliente.ApellidoP === '') {
       this.Incomplete = true;
       this.AlertText = "Ingresa un apellido paterno";
+      this.btn_disabled = false;
+      return;
+    }
+    if (this.Cliente.CURP === '') {
+      this.Incomplete = true;
+      this.AlertText = "Ingresa un CURP";
+      this.btn_disabled = false;
+      return;
+    }
+
+    if (this.Cliente.Cumpleanos === '') {
+      this.Incomplete = true;
+      this.AlertText = "Ingresa la fecha de nacimiento";
+      this.btn_disabled = false;
+      return;
+    }
+    if (this.Cliente.Sexo === '') {
+      this.Incomplete = true;
+      this.AlertText = "Ingresa el sexo de la persona";
+      this.btn_disabled = false;
+      return;
+    }
+
+    if (!this.gf.CleanAccentCaps(this.Cliente.CURP).includes(this.gf.CleanAccentCaps(this.Cliente.CURP_Calc))) {
+      this.Incomplete = true;
+      this.AlertText = "El curp debe contener " + this.Cliente.CURP_Calc + " + digitos";
+      this.btn_disabled = false;
+      return;
+    }
+    if (this.Cliente.CURP.length < 18) {
+      this.Incomplete = true;
+      this.AlertText = "El curp es muy corto";
+      this.btn_disabled = false;
+      return;
+    }
+    if (this.Cliente.CURP.length > 18) {
+      this.Incomplete = true;
+      this.AlertText = "El curp es muy largo";
       this.btn_disabled = false;
       return;
     }
@@ -563,24 +650,6 @@ export class MyModal {
       this.btn_disabled = false;
       return;
     }
-    if (this.Cliente.CURP === '') {
-      this.Incomplete = true;
-      this.AlertText = "Ingresa un CURP";
-      this.btn_disabled = false;
-      return;
-    }
-    if (this.Cliente.Cumpleanos === '') {
-      this.Incomplete = true;
-      this.AlertText = "Ingresa la fecha de nacimiento";
-      this.btn_disabled = false;
-      return;
-    }
-    if (this.Cliente.Sexo === '') {
-      this.Incomplete = true;
-      this.AlertText = "Ingresa el sexo de la persona";
-      this.btn_disabled = false;
-      return;
-    }
 
     if (this.Cliente.ApellidoM === '') {
       this.Cliente.ApellidoM = ' ';
@@ -589,18 +658,40 @@ export class MyModal {
       this.Cliente.NumeroInt = ' ';
     }
 
-    this.gf.NuevoCliente(this.Cliente.Nombre + '#' + this.Cliente.ApellidoP + '#' + this.Cliente.ApellidoM,
-      this.Cliente.Calle + '#' + this.Cliente.NumeroExt + '#' + this.Cliente.NumeroInt + '#' + this.Cliente.Colonia + '#' +
-      this.Cliente.Municipio + '#' + this.Cliente.Estado + '#' + this.Cliente.CP,
-      this.Cliente.Telefono, this.Cliente.CURP, this.Cliente.Cumpleanos, this.Cliente.Sexo, this.Cliente.Identificador,
-      parseInt(this.Cliente.ID_Ubicacion))
-      .then(res => {
-        if (res) {
-          this.closeModal();
-        } else {
+    if (this.Tipo === gv.Nuevo) {
+      this.gf.NuevoCliente(this.Cliente.Nombre + '#' + this.Cliente.ApellidoP + '#' + this.Cliente.ApellidoM,
+        this.Cliente.Calle + '#' + this.Cliente.NumeroExt + '#' + this.Cliente.NumeroInt + '#' + this.Cliente.Colonia + '#' +
+        this.Cliente.Municipio + '#' + this.Cliente.Estado + '#' + this.Cliente.CP,
+        this.Cliente.Telefono, this.Cliente.CURP, this.Cliente.Cumpleanos, this.Cliente.Sexo, this.Cliente.Identificador,
+        parseInt(this.Cliente.ID_Ubicacion))
+        .then(res => {
+          if (res) {
 
-        }
-      })
+          } else {
+
+          }
+          this.closeModal();
+
+        })
+    } else
+      if (this.Tipo === gv.Actualizar) {
+        console.log(this.Cliente.ID_Ubicacion)
+        this.gf.ActualizaCliente(this.Cliente.Nombre + '#' + this.Cliente.ApellidoP + '#' + this.Cliente.ApellidoM,
+          this.Cliente.Calle + '#' + this.Cliente.NumeroExt + '#' + this.Cliente.NumeroInt + '#' + this.Cliente.Colonia + '#' +
+          this.Cliente.Municipio + '#' + this.Cliente.Estado + '#' + this.Cliente.CP,
+          this.Cliente.Telefono, this.Cliente.CURP, this.Cliente.Cumpleanos, this.Cliente.Sexo, this.Cliente.Identificador,
+          parseInt(this.Cliente.ID_Ubicacion), this.Info_Cliente[gv.key])
+          .then(res => {
+            if (res) {
+
+            } else {
+
+            }
+            this.closeModal();
+
+          });
+      }
+
   }
   ChecEncargado() {
     console.log(this.Cliente.ID_Ubicacion)
@@ -817,7 +908,14 @@ export class MyModal {
   }
   AgregarProducto() {
     this.gf.AgregarProducto(parseInt(this.Producto.Credito), parseInt(this.Producto.Total_Pagos), this.Producto.Periodo, parseInt(this.Producto.Pago),
-      this.Producto.Total_Credito, parseInt(this.Producto.Efectivo));
+      this.Producto.Total_Credito, parseInt(this.Producto.Efectivo))
+      .then(res => {
+        if (res) {
+          this.modalCtrl.dismiss({
+            'dismissed': true
+          });
+        }
+      });
   }
   CambioPagoNum(Pago, Num_Pagos) {
     if (Pago === '') {
@@ -829,5 +927,4 @@ export class MyModal {
 
     this.Producto.Total_Credito = parseInt(Pago) * parseInt(Num_Pagos);
   }
-
 }

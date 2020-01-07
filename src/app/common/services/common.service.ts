@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { gv } from '../constants';
 import { Storage } from '@ionic/storage';
 import * as firebase from 'firebase';
+import { Response } from 'selenium-webdriver/http';
 
 @Injectable()
 
@@ -19,7 +20,7 @@ export class CommonService {
         public plt: Platform) {
 
     }
-    
+
     //----------------------------------------------------------Collaborador
     CrearCollaborador(Name: string, Password: string, mail: string, organizacion: string,
         ID: number, Etiqueta: string) {
@@ -41,7 +42,7 @@ export class CommonService {
                         firebase.auth().currentUser.sendEmailVerification().then((mail_veri_res) => {
                             console.log("mail sent")
                             console.log(mail_veri_res);
-                            resolve(res);
+                            resolve(data.user.uid);
                         }).catch((err) => {
                             console.log("err at mail sent")
                             reject(err);
@@ -77,20 +78,42 @@ export class CommonService {
     NuevoCliente(nombre: string, direccion: string, telefono: string, curp: string, fecha_nacimiento: string, sexo: string,
         identificador: string, ID: number) {
         return new Promise<any>((resolve, reject) => {
-            let Fecha = new Date(fecha_nacimiento);
-
+            let fecha = new Date(fecha_nacimiento);
             this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Clientes).add({
                 [gv.nombre]: nombre,
                 [gv.direccion]: direccion,
                 [gv.telefono]: telefono,
                 [gv.curp]: curp,
-                [gv.nacimiento]: this.YYMMDDFormatFromDate(Fecha),
+                [gv.nacimiento]: this.YYMMDDFormatFromDate(fecha),
                 [gv.sexo]: sexo,
                 [gv.identificador]: identificador,
 
                 [gv.ID_Ubicacion]: ID
             }).then((reponse) => {
                 this.Toast('Cliente agregado', 2000);
+                resolve(true);
+            }).catch((error) => {
+                this.Toast('Error al agregar cliente', 2000);
+                reject(false);
+            });
+        });
+    }
+    ActualizaCliente(nombre: string, direccion: string, telefono: string, curp: string, fecha_nacimiento: string, sexo: string,
+        identificador: string, ID: number, key: string) {
+        return new Promise<any>((resolve, reject) => {
+            let fecha = new Date(fecha_nacimiento);
+            this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Clientes).doc(key).update({
+                [gv.nombre]: nombre,
+                [gv.direccion]: direccion,
+                [gv.telefono]: telefono,
+                [gv.curp]: curp,
+                [gv.nacimiento]: this.YYMMDDFormatFromDate(fecha),
+                [gv.sexo]: sexo,
+                [gv.identificador]: identificador,
+
+                [gv.ID_Ubicacion]: ID
+            }).then((reponse) => {
+                this.Toast('Cliente actualizado', 2000);
                 resolve(true);
             }).catch((error) => {
                 this.Toast('Error al agregar cliente', 2000);
@@ -119,7 +142,7 @@ export class CommonService {
                         .doc(gv.usuario[gv.organizacion]).collection(gv.FB_Pagos).doc(key_primer_pago);
 
                     CreditBatch.set(PaymentRef,
-                        this.PrimerPago(nombre, x + 1, Key_Creador, efectivo, credito, identificador, pago, gv.status_proximo,
+                        this.PrimerPago(x + 1, Key_Creador, efectivo, credito, identificador, pago, gv.status_proximo,
                             this.GetRef(date_credit, hora), total_credito, deposito, key_primer_pago, ArrGarantias, folio,
                             ArrAval, razon, cargo_por_servicio, ID_Ubicacion));
 
@@ -129,14 +152,14 @@ export class CommonService {
                             .doc(gv.usuario[gv.organizacion]).collection(gv.FB_Pagos).doc();
 
                         CreditBatch.set(PaymentRef,
-                            this.UltimoPago(nombre, x + 1, Key_Creador, total_pagos, identificador, pago, gv.status_proximo,
+                            this.UltimoPago(x + 1, Key_Creador, total_pagos, identificador, pago, gv.status_proximo,
                                 this.GetRef(date_credit, hora), deposito, key_primer_pago, cargo_por_servicio, ID_Ubicacion));
                     } else {
                         var PaymentRef = this.db.firestore.collection(gv.FB_Organizaciones)
                             .doc(gv.usuario[gv.organizacion]).collection(gv.FB_Pagos).doc();
 
                         CreditBatch.set(PaymentRef,
-                            this.NormalPago(nombre, x + 1, Key_Creador, identificador, pago, gv.status_proximo,
+                            this.NormalPago(x + 1, Key_Creador, identificador, pago, gv.status_proximo,
                                 this.GetRef(date_credit, hora), deposito, key_primer_pago, cargo_por_servicio, ID_Ubicacion));
                     }
                 date_credit = this.GetFechaPorPeriodo(date_credit, periodo);
@@ -166,7 +189,7 @@ export class CommonService {
 
         return date;
     }
-    PrimerPago(nombre: string, num_pago: number, key_creador: string, efectivo: number, credito: number, identificador: string,
+    PrimerPago(num_pago: number, key_creador: string, efectivo: number, credito: number, identificador: string,
         pago: number, status: string, timeref: number, total_credito: number, deposito: string, key_primer_pago: string, ArrGarantias,
         folio, ArrAval, razon: string, cargo_por_servicio: number, ID_Ubicacion: number) {
         return {
@@ -180,7 +203,6 @@ export class CommonService {
             [gv.credito]: Number(credito),
             [gv.cargo_por_servicio]: Number(cargo_por_servicio),
 
-            [gv.nombre]: nombre,
             [gv.garantias]: ArrGarantias,
             [gv.num_pago]: Number(num_pago),
             [gv.razon_de_credito]: razon,
@@ -195,14 +217,13 @@ export class CommonService {
             [gv.deposito]: deposito
         }
     }
-    UltimoPago(nombre: string, num_pago: number, key_creador: string, total_pagos: number, identificador: string, pago: number, status: string,
+    UltimoPago(num_pago: number, key_creador: string, total_pagos: number, identificador: string, pago: number, status: string,
         timeref: number, deposito: string, key_primer_pago: string, cargo_por_servicio: number, ID_Ubicacion: number) {
         return {
             [gv.total_pagos]: Number(total_pagos),
             [gv.cargo_por_servicio]: Number(cargo_por_servicio),
             [gv.ID_Ubicacion]: ID_Ubicacion,
 
-            [gv.nombre]: nombre,
             [gv.num_pago]: Number(num_pago),
             [gv.key_creador]: key_creador,
             [gv.pago]: Number(pago),
@@ -213,10 +234,9 @@ export class CommonService {
             [gv.key_primer_pago]: key_primer_pago,
         }
     }
-    NormalPago(nombre: string, num_pago: number, key_creador: string, identificador: string, pago: number,
+    NormalPago(num_pago: number, key_creador: string, identificador: string, pago: number,
         status: string, timeref: number, deposito: string, key_primer_pago: string, cargo_por_servicio: number, ID_Ubicacion: number) {
         return {
-            [gv.nombre]: nombre,
             [gv.num_pago]: Number(num_pago),
             [gv.ID_Ubicacion]: ID_Ubicacion,
             [gv.cargo_por_servicio]: Number(cargo_por_servicio),
@@ -233,6 +253,11 @@ export class CommonService {
     GetRef(date: Date, Hour: string): number {
         return Number(date.getFullYear().toString().substr(-2) + this.AgregarCero(date.getMonth() + 1) + this.AgregarCero(date.getDate()) + Hour);
     }
+    ConvertYYMMDDtoDDMMYY(date: string) {
+        let split_date = date.split("/");
+
+        return [split_date[2], split_date[1], split_date[0]].join('/');
+    }
     BuscarCreditoPorFolio(folio: string) {
         let Credito = [];
         Credito = gv.pagos_Arr.filter(pago => {
@@ -242,9 +267,8 @@ export class CommonService {
     }
 
     //-------------------------------------------------------MODIFICAR CREDITO
-    PagoCredito(Proximo, PrimerPago, ArrPagos, multa: number, pay: number, name: string) {
+    PagoCredito(Proximo, PrimerPago, ArrPagos, multa: number, pay: number, name: string, today: Date) {
         return new Promise<any>((resolve, reject) => {
-            let today = new Date();
 
             var PaymentBatch = this.db.firestore.batch();
 
@@ -284,7 +308,7 @@ export class CommonService {
                         cargo = 0;
                     }
 
-                    let ParcialPay = this.NormalPago(PrimerPago[gv.nombre], Math.floor((Proximo[gv.num_pago] + .1) * 10) / 10, PrimerPago[gv.key_creador],
+                    let ParcialPay = this.NormalPago(Math.floor((Proximo[gv.num_pago] + .1) * 10) / 10, PrimerPago[gv.key_creador],
                         PrimerPago[gv.identificador], Proximo[gv.pago] - pay, gv.status_vencido,
                         Proximo[gv.fecha], PrimerPago[gv.deposito], PrimerPago[gv.key], cargo, PrimerPago[gv.ID_Ubicacion]);
 
@@ -293,20 +317,21 @@ export class CommonService {
             } else
                 if (Proximo[gv.pago] < pay) {
                     console.log("Pay bigger than payment");
-                    //Set this payment as paid
+
                     var Total_Pay_Ref = this.db.firestore.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion])
                         .collection(gv.FB_Pagos).doc(Proximo['key']);
+
                     PaymentBatch.update(Total_Pay_Ref, {
                         [gv.status]: gv.status_pagado,
-                        [gv.cantidad_pagado]: Number(Proximo[gv.pago] + multa),
+                        [gv.cantidad_pagado]: Number(pay + multa),
                         [gv.cargo_por_servicio]: firebase.firestore.FieldValue.increment(multa),
-                        [gv.pago]: Number(Proximo[gv.pago] + multa),
+                        [gv.pago]: Number(pay + multa),
                         [gv.multa]: Number(multa),
                         [gv.cobrado_por]: name,
                         [gv.dia_cobro]: this.GetRef(today, this.AgregarCero(today.getHours()) + '' + this.AgregarCero(today.getMinutes()))
                     });
 
-                    pay -= Proximo[gv.pago];
+                    pay -= Proximo[gv.pago]
 
                     let NextPay = [];
                     NextPay = ArrPagos.filter(pago => {
@@ -315,52 +340,44 @@ export class CommonService {
                     });
                     NextPay.sort((a, b) => { return a[gv.num_pago] - b[gv.num_pago] });
 
-                    for (let x = 1; x < NextPay.length; x++) {
-                        if (pay >= NextPay[x][gv.pago]) {
-
-                            //Set payment as fully paid as paid is greater than payment
+                    for (let x = (NextPay.length - 1); x > 0; x--) {
+                        if (NextPay[x][gv.pago] > pay) {
                             var Total_Pay_Ref = this.db.firestore.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion])
                                 .collection(gv.FB_Pagos).doc(NextPay[x]['key']);
-                            PaymentBatch.update(Total_Pay_Ref, {
-                                [gv.status]: gv.status_pagado,
-                                [gv.cantidad_pagado]: NextPay[x][gv.pago],
-                                [gv.multa]: Number(0),
-                                [gv.cobrado_por]: name,
-                                [gv.dia_cobro]: this.GetRef(today, this.AgregarCero(today.getHours()) + '' + this.AgregarCero(today.getMinutes()))
-                            });
 
-                            pay -= NextPay[x][gv.pago];
+                            PaymentBatch.update(Total_Pay_Ref, {
+                                [gv.pago]: firebase.firestore.FieldValue.increment(-pay),
+                                [gv.total_pagos]: Number(NextPay[x][gv.num_pago])
+                            });
+                            break;
                         } else
-                            if (pay !== 0) {
-                                //This payment was half paid
+                            if (NextPay[x][gv.pago] === pay) {
+                                console.log("Pay = FINAL")
                                 var Total_Pay_Ref = this.db.firestore.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion])
                                     .collection(gv.FB_Pagos).doc(NextPay[x]['key']);
-                                PaymentBatch.update(Total_Pay_Ref, {
-                                    [gv.cantidad_pagado]: Number(pay),
-                                    [gv.pago]: Number(pay),
-                                    [gv.multa]: Number(0),
-                                    [gv.cobrado_por]: name,
-                                    [gv.status]: gv.status_pagado,
-                                    [gv.dia_cobro]: this.GetRef(today, this.AgregarCero(today.getHours()) + '' + this.AgregarCero(today.getMinutes()))
+
+                                PaymentBatch.delete(Total_Pay_Ref);
+
+                                var NewLastPayment = this.db.firestore.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion])
+                                    .collection(gv.FB_Pagos).doc(NextPay[x - 1]['key']);
+
+                                PaymentBatch.update(NewLastPayment, {
+                                    [gv.total_pagos]: NextPay[x - 1][gv.num_pago]
                                 });
 
-                                let cargo = NextPay[x][gv.cargo_por_servicio] - pay;
-
-                                if (cargo < 0) {
-                                    cargo = 0;
-                                }
-
-                                //Add another half paid payment
-                                var PaymentRef = this.db.firestore.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion])
-                                    .collection(gv.FB_Pagos).doc();
-                                PaymentBatch.set(PaymentRef, this.NormalPago(PrimerPago[gv.nombre],
-                                    Math.floor((NextPay[x][gv.num_pago] + .1) * 10) / 10,
-                                    PrimerPago[gv.key_creador], PrimerPago[gv.identificador], NextPay[x][gv.pago] - pay,
-                                    gv.status_proximo, NextPay[x][gv.fecha], NextPay[x][gv.deposito], PrimerPago[gv.key], cargo,
-                                    PrimerPago[gv.ID_Ubicacion]));
                                 break;
-                            }
+                            } else
+                                if (NextPay[x][gv.pago] < pay) {
+                                    console.log("Pay > FINAL")
+                                    pay -= NextPay[x][gv.pago];
+
+                                    var Total_Pay_Ref = this.db.firestore.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion])
+                                        .collection(gv.FB_Pagos).doc(NextPay[x]['key']);
+
+                                    PaymentBatch.delete(Total_Pay_Ref);
+                                }
                     }
+
                 } else
                     if (Proximo[gv.pago] === pay) {
                         console.log("Pay equal to payment");
@@ -444,7 +461,7 @@ export class CommonService {
                 }
             }
 
-            let LastPayment = this.UltimoPago(Proximo[gv.nombre], Proximo[gv.num_pago], Proximo[gv.key_creador], Proximo[gv.num_pago],
+            let LastPayment = this.UltimoPago(Proximo[gv.num_pago], Proximo[gv.key_creador], Proximo[gv.num_pago],
                 Proximo[gv.identificador], Total_Remaining - pago_perdonado, gv.status_pagado, Proximo[gv.fecha],
                 Proximo[gv.deposito], Proximo[gv.key_primer_pago], Total_Cargo, Proximo[gv.ID_Ubicacion]);
 
@@ -504,7 +521,7 @@ export class CommonService {
                         .doc(gv.usuario[gv.organizacion]).collection(gv.FB_Pagos).doc();
 
                     ReStructure.set(NormalPaymentRef,
-                        this.NormalPago(Proximo[gv.nombre], Math.ceil(ArrPagos[0][gv.num_pago]) + y, Proximo[gv.key_creador],
+                        this.NormalPago(Math.ceil(ArrPagos[0][gv.num_pago]) + y, Proximo[gv.key_creador],
                             Proximo[gv.identificador], pago, gv.status_proximo,
                             this.GetRef(date_credit, this.AgregarCero(date_credit.getHours()) + '' + this.AgregarCero(date_credit.getMinutes())),
                             Proximo[gv.deposito], Proximo[gv.key_primer_pago], Total_Cargo / Num_payments, Proximo[gv.ID_Ubicacion]));
@@ -515,7 +532,7 @@ export class CommonService {
                         .doc(gv.usuario[gv.organizacion]).collection(gv.FB_Pagos).doc();
 
                     ReStructure.set(LastPaymentRef,
-                        this.UltimoPago(Proximo[gv.nombre], Math.ceil(ArrPagos[0][gv.num_pago] + y), Proximo[gv.key_creador],
+                        this.UltimoPago(Math.ceil(ArrPagos[0][gv.num_pago] + y), Proximo[gv.key_creador],
                             Num_payments, Proximo[gv.identificador], pago, gv.status_proximo,
                             this.GetRef(date_credit, this.AgregarCero(date_credit.getHours()) + '' + this.AgregarCero(date_credit.getMinutes())),
                             Proximo[gv.deposito], Proximo[gv.key_primer_pago], Total_Cargo / Num_payments, Proximo[gv.ID_Ubicacion]));
@@ -562,7 +579,7 @@ export class CommonService {
                         .doc(gv.usuario[gv.organizacion]).collection(gv.FB_Pagos).doc();
 
                     PaymentBatch.set(NormalPaymentRef,
-                        this.NormalPago(ArrPagos[0][gv.nombre], ArrPagos[ArrPagos.length - 1][gv.num_pago] + x + 1, ArrPagos[0][gv.key_creador],
+                        this.NormalPago(ArrPagos[ArrPagos.length - 1][gv.num_pago] + x + 1, ArrPagos[0][gv.key_creador],
                             ArrPagos[0][gv.identificador], pago, gv.status_proximo,
                             this.GetRef(date_credit, this.AgregarCero(date_credit.getHours()) + '' + this.AgregarCero(date_credit.getMinutes())),
                             ArrPagos[0][gv.deposito], ArrPagos[0][gv.key_primer_pago], pago, ArrPagos[0][gv.identificador]));
@@ -573,7 +590,7 @@ export class CommonService {
                         .doc(gv.usuario[gv.organizacion]).collection(gv.FB_Pagos).doc();
 
                     PaymentBatch.set(LastPaymentRef,
-                        this.UltimoPago(ArrPagos[0][gv.nombre], ArrPagos[ArrPagos.length - 1][gv.num_pago] + x + 1, ArrPagos[0][gv.key_creador],
+                        this.UltimoPago(ArrPagos[ArrPagos.length - 1][gv.num_pago] + x + 1, ArrPagos[0][gv.key_creador],
                             ArrPagos[ArrPagos.length - 1][gv.total_pagos] + Pagos_Extra, ArrPagos[0][gv.identificador], pago,
                             gv.status_proximo,
                             this.GetRef(date_credit, this.AgregarCero(date_credit.getHours()) + '' + this.AgregarCero(date_credit.getMinutes())),
@@ -680,21 +697,36 @@ export class CommonService {
 
     //---------------------------------------------------------PRODUCTO
     AgregarProducto(credito: number, total_pagos: number, periodo: string, pago: number, total_credito: number, efectivo: number) {
-        this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Productos).add({
-            [gv.credito]: Number(credito),
-            [gv.total_pagos]: Number(total_pagos),
-            [gv.periodo]: periodo,
-            [gv.pago]: Number(pago),
-            [gv.total_credito]: Number(total_credito),
-            [gv.efectivo]: Number(efectivo)
-        }).then((reponse) => {
-            this.Toast('Producto agregado', 2000);
-        }).catch((error) => {
-            this.Toast('Error al agregar el producto', 2000);
-        });
-    }
-    EliminarProducto(){
+        return new Promise<any>((resolve, reject) => {
 
+            this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Info).doc(gv.FB_Productos).update({
+                [`${gv.FB_Productos}.${credito + total_pagos + total_credito + periodo}`]: {
+                    [gv.credito]: Number(credito),
+                    [gv.total_pagos]: Number(total_pagos),
+                    [gv.periodo]: periodo,
+                    [gv.pago]: Number(pago),
+                    [gv.total_credito]: Number(total_credito),
+                    [gv.efectivo]: Number(efectivo)
+                }
+            }).then((reponse) => {
+                this.Toast('Producto agregado', 2000);
+                resolve(true);
+            }).catch((error) => {
+                this.Toast('Error al agregar el producto', 2000);
+                reject(false);
+            });
+        })
+
+    }
+    EliminarProducto(key) {
+        this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Info).doc(gv.FB_Productos).update({
+            [`${gv.FB_Productos}.${key}`]: firebase.firestore.FieldValue.delete()
+
+        }).then((reponse) => {
+            this.Toast('Producto eliminado', 2000);
+        }).catch((error) => {
+            this.Toast('Error al eliminar el producto', 2000);
+        });
     }
 
     async Toast(message: string, duration: number) {
@@ -770,26 +802,26 @@ export class CommonService {
         }
         return ID_El;
     }
-    GetValorEspecificado(valor, ID){
-        if(valor === gv.agente){
-            return ID%100;
-        } else 
-        if(valor === gv.dm){
-            ID = Math.floor(ID / 100)
-            return ID%100;
-        } else 
-        if(valor === gv.sucursal){
-            ID = Math.floor(ID / 10000)
-            return ID%100;
-        } else 
-        if(valor === gv.zona){
-            ID = Math.floor(ID / 1000000)
-            return ID%100;
-        } else 
-        if(valor === gv.region){
-            ID = Math.floor(ID / 100000000)
-            return ID%100;
-        }
+    GetValorEspecificado(valor, ID) {
+        if (valor === gv.agente) {
+            return ID % 100;
+        } else
+            if (valor === gv.dm) {
+                ID = Math.floor(ID / 100)
+                return ID % 100;
+            } else
+                if (valor === gv.sucursal) {
+                    ID = Math.floor(ID / 10000)
+                    return ID % 100;
+                } else
+                    if (valor === gv.zona) {
+                        ID = Math.floor(ID / 1000000)
+                        return ID % 100;
+                    } else
+                        if (valor === gv.region) {
+                            ID = Math.floor(ID / 100000000)
+                            return ID % 100;
+                        }
     }
     GetRangoDeID(ID) {
         let Rango = [];
@@ -831,9 +863,13 @@ export class CommonService {
                 this.ListenersClientesPagos();
                 this.ListenersColaboradores();
 
-                if (this.router.url === '/login') {
-                    this.IrAClientes();
-                }
+                if (gv.usuario[gv.organizacion] === undefined) {
+                    this.IrANuevaFinanciera();
+                } else
+                    if (this.router.url === '/login') {
+                        this.IrAClientes();
+                    }
+
                 this.EnableSideMenu();
             } else {
                 this.IrALogin();
@@ -848,15 +884,19 @@ export class CommonService {
     IrAClientes() {
         this.router.navigateByUrl('clients');
     }
+    IrANuevaFinanciera() {
+        this.router.navigateByUrl('newfinance');
+    }
     IrACreditos() {
         this.router.navigateByUrl('credit');
     }
 
     Clientessubscribe;
     PagosSubscribe;
+    InfoSubscribe;
     ListenersClientesPagos() {
 
-        if (this.Clientessubscribe === undefined) {
+        if (this.Clientessubscribe === undefined && gv.usuario[gv.organizacion] !== undefined) {
             gv.clientes = [];
 
             this.Clientessubscribe = this.db.collection(gv.FB_Organizaciones)
@@ -913,7 +953,7 @@ export class CommonService {
                 });
         }
 
-        if (this.PagosSubscribe === undefined) {
+        if (this.PagosSubscribe === undefined && gv.usuario[gv.organizacion] !== undefined) {
             gv.pagos_Arr = [];
 
             this.PagosSubscribe = this.db.collection(gv.FB_Organizaciones)
@@ -969,18 +1009,39 @@ export class CommonService {
                 });
         }
 
-        if (!gv.DT_Productos) {
-            this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Productos)
-                .get().subscribe(serverItems => {
+        if (this.InfoSubscribe === undefined && gv.usuario[gv.organizacion] !== undefined) {
+            this.db.collection(gv.FB_Organizaciones).doc(gv.usuario[gv.organizacion]).collection(gv.FB_Info)
+                .stateChanges().subscribe(serverItems => {
+                    serverItems.forEach((a, index, array) => {
+                        let item: any = a.payload.doc.data(); //a.payload.doc.id;
+                        console.log("INFO " + a.payload.doc.id)
+                        console.log(item[gv.FB_Productos])
 
-                    console.log("Productos");
+                        if (a.payload.doc.id === gv.FB_Productos) {
+                            const keys = Object.keys(item[gv.FB_Productos])
+                            for (let key of keys) {
+                                console.log("producto")
+                                console.log(item[gv.FB_Productos][key])
 
-                    serverItems.forEach((product) => {
-                        gv.ArrProductos.push(product.data())
-                        console.log(product.data())
+                                item[gv.FB_Productos][key]['key'] = key;
+                                gv.ArrProductos.push(item[gv.FB_Productos][key])
+                            }
+                        } else
+                            if (a.payload.doc.id === gv.FB_Banco) {
+                                gv.ArrProductos = item[gv.FB_Banco];
+                                const keys = Object.keys(item[gv.FB_Banco])
+                                for (let key of keys) {
+                                    console.log("Cuenta banco")
+                                    console.log(item[gv.FB_Banco][key])
+
+                                    item[gv.FB_Banco][key]['key'] = key;
+                                    gv.ArrBancos.push(item[gv.FB_Banco][key])
+                                }
+
+                            }
+
                     });
 
-                    gv.DT_Productos = true;
                 });
         }
     }
@@ -1038,6 +1099,7 @@ export class CommonService {
 
                         if (index === (array.length - 1)) {
                             console.log("Ya termino");
+                            gv.DT_Colaboradores = true;
 
                         }
                     });
@@ -1086,6 +1148,10 @@ export class CommonService {
         if (this.Clientessubscribe !== undefined) {
             this.Clientessubscribe.unsubscribe();
             this.Clientessubscribe = undefined;
+        }
+        if (this.InfoSubscribe !== undefined) {
+            this.InfoSubscribe.unsubscribe();
+            this.InfoSubscribe = undefined;
         }
         if (this.PagosSubscribe !== undefined) {
             this.PagosSubscribe.unsubscribe();

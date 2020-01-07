@@ -19,6 +19,7 @@ export class adminComponent {
   Multa = '';
   Pago_Total;
   Btn_Desactivado = false;
+  colaboradores = [];
 
   Pagos_Proximos = [];
 
@@ -31,6 +32,10 @@ export class adminComponent {
   }
 
   ngOnInit() {
+    this.colaboradores = gv.colaboradores;
+
+    gv.colaboradores.sort((a, b) => { return a[gv.ID_Ubicacion] - b[gv.ID_Ubicacion] });
+
     this.gf.CheckLogin();
   }
 
@@ -58,15 +63,15 @@ export class adminComponent {
     modal.present();
   }
 
-  async AgregarProducto(){
-      const modal = await this.modalController.create({
-        component: MyModal,
-        componentProps: {
-          type: "Producto"
-        }
-      });
-  
-      modal.present();
-    }
+  async AgregarProducto() {
+    const modal = await this.modalController.create({
+      component: MyModal,
+      componentProps: {
+        type: "Producto"
+      }
+    });
+
+    modal.present();
+  }
 
 }

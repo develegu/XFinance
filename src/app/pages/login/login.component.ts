@@ -73,8 +73,13 @@ export class LoginComponent {
           this.gf.ListenersClientesPagos();
           this.gf.ListenersColaboradores();
           this.gf.EnableSideMenu();
+
+          if(gv.usuario[gv.organizacion] === undefined){
+
+          } else {
+            this.gf.IrAClientes();
+          }
   
-          this.gf.IrAClientes();
         });
       }
     }).catch((error) => {

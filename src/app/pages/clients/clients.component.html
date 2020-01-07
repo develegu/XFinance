@@ -11,10 +11,21 @@
 
 <ion-content>
 
-  <ion-col>
-    <ion-button (click)="presentClienteModal()">Nuevo cliente</ion-button>
-    <ion-input placeholder="ID Cliente" [(ngModel)]="IDCliente" (ngModelChange)='BuscarCliente()'></ion-input>
-  </ion-col>
+  <ion-row>
+    <ion-col>
+      <ion-button (click)="presentClienteModal()">Nuevo cliente</ion-button>
+    </ion-col>
+    <ion-col>
+      <ion-select placeholder="Agente" interface="action-sheet" [(ngModel)]="Agente" (ngModelChange)='BuscarCliente()'>
+        <ion-select-option [(value)]="agente[gv.ID_Ubicacion]" *ngFor="let agente of Agentes">
+          {{ agente[gv.nombre] }}
+        </ion-select-option>
+      </ion-select>
+    </ion-col>
+    <ion-col>
+      <ion-input placeholder="ID Cliente" [(ngModel)]="IDCliente" (ngModelChange)='BuscarCliente()'></ion-input>
+    </ion-col>
+  </ion-row>
 
   <ion-row *ngFor="let client of Cliente">
     <div class="item">
@@ -68,7 +79,7 @@
           </ion-col>
         </ion-row>
 
-        <ion-row *ngIf="ArrCreditos[this.Selected + gv.info] !== undefined">
+        <ion-row *ngIf="ArrCreditos[this.Selected + gv.info] !== undefined && ArrCreditos[this.Selected + gv.info][1].length !== 0">
           <ion-col>
             <h4>Siguiente pago</h4>
           </ion-col>
@@ -109,6 +120,28 @@
             <ion-button [disabled]="Btn_Desactivado" (click)="Pay()">Pagar</ion-button>
           </ion-col>
 
+          <ion-col size="1" style="margin-right: 30px;">
+            <ion-item>
+              <ion-textarea [(ngModel)]="Anio" type="number" placeholder="Año"
+                (ngModelChange)='CambioPagoMulta(Pago, Multa)'>
+              </ion-textarea>
+            </ion-item>
+          </ion-col>
+          <ion-col size="1" style="margin-right: 30px;">
+            <ion-item>
+              <ion-textarea [(ngModel)]="Mes" type="number" placeholder="Mes"
+                (ngModelChange)='CambioPagoMulta(Pago, Multa)'>
+              </ion-textarea>
+            </ion-item>
+          </ion-col>
+          <ion-col size="1" style="margin-right: 30px;">
+            <ion-item>
+              <ion-textarea [(ngModel)]="Dia" type="number" placeholder="Dia"
+                (ngModelChange)='CambioPagoMulta(Pago, Multa)'>
+              </ion-textarea>
+            </ion-item>
+          </ion-col>
+
           <ion-col size="1" style="margin-left: 30px;">
             <ion-button (click)="OpcionesDeCreditoModal()">Opciones de credito</ion-button>
           </ion-col>
@@ -124,6 +157,35 @@
       </ion-row>
 
       <div *ngIf="VerPagos">
+        <ion-row>
+          <ion-col style=" font-weight: bold;">
+            Pago
+          </ion-col>
+          <ion-col style=" font-weight: bold;">
+            Progamado
+          </ion-col>
+          <ion-col style=" font-weight: bold;">
+            Pagado
+          </ion-col>
+          <ion-col style=" font-weight: bold;">
+            Multa
+          </ion-col>
+          <ion-col style=" font-weight: bold;">
+            Pago total
+          </ion-col>
+          <ion-col style=" font-weight: bold;">
+            Saldo
+          </ion-col>
+          <ion-col style=" font-weight: bold;">
+            # Pago
+          </ion-col>
+          <ion-col style=" font-weight: bold;">
+            Cobrado por
+          </ion-col>
+          <ion-col>
+          </ion-col>
+        </ion-row>
+
         <ion-row *ngFor="let pago of PagosSeleccionados">
           <ion-col *ngIf="pago[gv.multa] !== undefined">
             ${{ pago[gv.pago] - pago[gv.multa] }}.00
@@ -150,6 +212,9 @@
             ${{ pago[gv.pago] }}.00
           </ion-col>
           <ion-col>
+            ${{ GetSaldo(pago[gv.key]) }}.00
+          </ion-col>
+          <ion-col>
             {{ pago[gv.num_pago] }}
           </ion-col>
           <ion-col>
@@ -158,6 +223,8 @@
           <ion-col *ngIf="pago[gv.status] === gv.status_pagado">
             <ion-icon color="medium" name="close-circle-outline" (click)="RegresarPago(pago)">
             </ion-icon>
+          </ion-col>
+          <ion-col *ngIf="pago[gv.status] !== gv.status_pagado">
           </ion-col>
         </ion-row>
       </div>
@@ -176,7 +243,8 @@
   </ion-row>
 
   <div *ngIf="Cliente[0] === undefined">
-    <ion-row *ngFor="let cliente of ListaClientes" (click)="IDCliente = cliente[gv.identificador]" (click)="BuscarCliente()">
+    <ion-row *ngFor="let cliente of ListaClientes" (click)="IDCliente = cliente[gv.identificador]"
+      (click)="BuscarCliente()">
       <ion-col>
         Cliente: {{ cliente[gv.identificador] }}
       </ion-col>

@@ -4,14 +4,16 @@ export const gv = {
     FB_Pagos: 'pagos',
     FB_Usuarios: 'usuarios',
     FB_Organizaciones: 'organizaciones',
-    FB_OrgInfo: 'info',
     FB_Catalogo: 'catalogo',
     FB_Productos: 'productos',
+    FB_Info: 'info',
+    FB_Banco: 'banco',
 
     //DATALOADED
     DT_Clientes: false,
     DT_Pagos: false,
-    DT_Productos: false,
+    DT_Info: false,
+    DT_Colaboradores: false,
 
     plan: 'plan',
 
@@ -29,7 +31,7 @@ export const gv = {
     password: 'pass',
     organizacion: 'org',
     modificado_por: 'mod_por',
-    dueno: 'Dueno', region: 'Region', zona: 'Zona', sucursal: 'Sucursal', dm: 'Encargado', agente: 'Agente',
+    dueno: 'Dueno', region: 'Region', zona: 'Zona', sucursal: 'Sucursal', dm: 'Supervisor', agente: 'Agente',
     tag: 'tag',
 
     //INFO CREDITOS
@@ -67,6 +69,7 @@ export const gv = {
     usuario: {},
     colaboradores: [],
     roll: 'roll', Administrador: 'admin', Cobrador: 'cob', Oficina: 'off', Dueno: 'duen',
+    ArrBancos: [],
 
 
     ArrProductos: [],

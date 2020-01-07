@@ -80,6 +80,8 @@ export class CreditComponent {
 
   ngOnInit() {
     this.ArrProductos = gv.ArrProductos;
+    
+    console.log(this.ArrProductos)
     this.gf.CheckLogin();
 
     if (gv.ClienteToCreditoInfo.length !== 0) {

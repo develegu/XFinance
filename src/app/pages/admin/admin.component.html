@@ -10,6 +10,7 @@
 </ion-header>
 
 <ion-content>
+  <h1>Usuarios</h1>
 
   <ion-col>
     <ion-button (click)="UsuarioModal()">Nuevo usuario</ion-button>
@@ -25,6 +26,10 @@
     <ion-col>
       {{ user[gv.tag] }}
     </ion-col>
+    <ion-col>
+      {{ this.gf.GetElementosDeID(user[gv.ID_Ubicacion])[gv.ID_Ubicacion] }}
+      ({{ this.gf.GetElementosDeID(user[gv.ID_Ubicacion])[this.gf.GetElementosDeID(user[gv.ID_Ubicacion])[gv.ID_Ubicacion]] }})
+    </ion-col>
 
     <ion-col>
       <ion-icon color="medium" name="close-circle-outline">
@@ -32,17 +37,35 @@
     </ion-col>
   </ion-row>
 
+  <h1>Productos</h1>
+
   <ion-col>
     <ion-button (click)="AgregarProducto()">Nuevo producto</ion-button>
   </ion-col>
 
-  <ion-row *ngFor="let producto of gv.ArrProductos">
+  <ion-row *ngFor="let producto of gv.ArrProductos | keyvalue">
     <ion-col>
-      ${{ producto[gv.credito] }}: {{ producto[gv.total_pagos] }} ({{ producto[gv.periodo] }})
+      ${{ producto.value[gv.credito] }}: {{ producto.value[gv.total_pagos] }} ({{ producto.value[gv.periodo] }})
     </ion-col>
 
     <ion-col>
-      <ion-icon color="medium" name="close-circle-outline">
+      <ion-icon color="medium" name="close-circle-outline" (click)="this.gf.EliminarProducto(producto.key)">
+      </ion-icon>
+    </ion-col>
+  </ion-row>
+
+  <h1>Cuentas de banco</h1>
+  <ion-col>
+    <ion-button (click)="AgregarProducto()">Nueva cuenta</ion-button>
+  </ion-col>
+
+  <ion-row *ngFor="let producto of gv.ArrBancos | keyvalue">
+    <ion-col>
+      ${{ producto.value[gv.credito] }}: {{ producto.value[gv.total_pagos] }} ({{ producto.value[gv.periodo] }})
+    </ion-col>
+
+    <ion-col>
+      <ion-icon color="medium" name="close-circle-outline" (click)="this.gf.EliminarProducto(producto.key)">
       </ion-icon>
     </ion-col>
   </ion-row>
