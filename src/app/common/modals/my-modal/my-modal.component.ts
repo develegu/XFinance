@@ -82,8 +82,8 @@ export class MyModal {
             this.Usuario.Zona = this.PermisosUsuario[gv.zona];
 
             this.Roles.push({
+              [gv.dm]: gv.dm,
               [gv.agente]: gv.agente,
-              [gv.dm]: gv.dm
             })
           } else
             if (this.PermisosUsuario[gv.ID_Ubicacion] === gv.region) {
@@ -93,11 +93,12 @@ export class MyModal {
               this.Usuario.Region = this.PermisosUsuario[gv.region];
 
               this.Roles.push({
-                [gv.agente]: gv.agente,
-                [gv.dm]: gv.dm,
+                [gv.zona]: gv.zona,
                 [gv.sucursal]: gv.sucursal,
-                [gv.zona]: gv.zona
-              })
+                [gv.dm]: gv.dm,
+                [gv.agente]: gv.agente,
+              });
+
             } else
               if (this.PermisosUsuario[gv.ID_Ubicacion] === gv.dueno) {
                 console.log("dueno")
@@ -905,11 +906,20 @@ export class MyModal {
     Total_Credito: 0,
     Efectivo: '',
     Periodo: '',
+    UtilidadCuota: 0,
+    Cargo: 0
   }
   AgregarProducto() {
+    
+    if (this.Producto.Credito === null) {
+      this.gf.Toast("El credito tiene que ser un numero", 2000);
+      return;
+    }
+
     this.gf.AgregarProducto(parseInt(this.Producto.Credito), parseInt(this.Producto.Total_Pagos), this.Producto.Periodo, parseInt(this.Producto.Pago),
       this.Producto.Total_Credito, parseInt(this.Producto.Efectivo))
       .then(res => {
+        console.log("RES AgregarProducto")
         if (res) {
           this.modalCtrl.dismiss({
             'dismissed': true
@@ -917,14 +927,25 @@ export class MyModal {
         }
       });
   }
-  CambioPagoNum(Pago, Num_Pagos) {
-    if (Pago === '') {
-      Pago = '0';
+  CambioInfoProducto() {
+    if (this.Producto.Pago === null || this.Producto.Pago === '') {
+      this.Producto.Pago = '0';
     }
-    if (Num_Pagos === '') {
-      Num_Pagos = '0';
+    if (this.Producto.Total_Pagos === null || this.Producto.Total_Pagos === '') {
+      this.Producto.Total_Pagos = '0';
     }
+    this.Producto.Total_Credito = parseInt(this.Producto.Pago) * parseInt(this.Producto.Total_Pagos);
 
-    this.Producto.Total_Credito = parseInt(Pago) * parseInt(Num_Pagos);
+
+    if (this.Producto.Efectivo === null || this.Producto.Efectivo === '') {
+      this.Producto.Efectivo = '0';
+    }
+    this.Producto.Cargo = this.Producto.Total_Credito - parseInt(this.Producto.Efectivo);
+
+    if (parseInt(this.Producto.Total_Pagos) === 0) {
+      this.Producto.UtilidadCuota = 0;
+    } else {
+      this.Producto.UtilidadCuota = Math.round(this.Producto.Cargo / parseInt(this.Producto.Total_Pagos));
+    }
   }
 }

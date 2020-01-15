@@ -37,37 +37,13 @@ export class MainScreen {
   ngOnInit() {
     this.gf.DisableSideMenu();
   }
-
+  
   AgregarFinanciera() {
-    this.Usuario.Incomplete = false;
-    this.Usuario.AlertText = '';
+    this.gf.IrANuevaFinanciera();
+  }
 
-    this.db.collection(gv.FB_Organizaciones).doc(this.Usuario.Organizacion).collection(gv.info).get().subscribe(serverItems => {
-
-      if (serverItems.empty) {
-
-        this.gf.CrearCollaborador(this.Usuario.Nombre, this.Usuario.Contrasena, this.Usuario.Mail, this.Usuario.Organizacion,
-          100000000, '')
-          .then(res => {
-
-            this.db.collection(gv.FB_Organizaciones).doc(this.Usuario.Organizacion).collection(gv.info).doc(gv.info).update({
-              [gv.dueno]: res
-            }).then((reponse) => {
-              this.gf.Toast('Cliente agregado', 2000);
-            }).catch((error) => {
-              this.gf.Toast('Error al agregar cliente', 2000);
-            });
-
-          });
-
-      } else {
-        this.Usuario.Incomplete = true;
-        this.Usuario.AlertText = "Este nombre de financiera ya existe";
-
-        console.log("this is not empty")
-      }
-
-    });
+  IniciarSesion() {
+    this.gf.IrALogin();
   }
 
 }

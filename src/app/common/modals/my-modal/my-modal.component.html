@@ -318,13 +318,6 @@
 
     <ion-row>
       <ion-col>
-        <ion-input disabled readonly placeholder="Organizacion" [(ngModel)]="Usuario.Organizacion">
-        </ion-input>
-      </ion-col>
-    </ion-row>
-
-    <ion-row>
-      <ion-col>
         <ion-input type="password" placeholder="Contraseña" [(ngModel)]="Usuario.Contrasena">
         </ion-input>
       </ion-col>
@@ -462,41 +455,70 @@
 
   <ion-grid *ngIf="type === 'Producto'">
 
-    <ion-text>
-      Ingresa la fecha a la que se pospondra el pago y la razon de posponerlo.
-    </ion-text>
+    <ion-row>
+      <ion-item>
+        <ion-label>Credito</ion-label>
+        <ion-input type="number" placeholder="Nombre" [(ngModel)]="Producto.Credito"></ion-input>
+      </ion-item>
+    </ion-row>
 
     <ion-row>
       <ion-col>
-        <ion-input type="number" placeholder="Credito" [(ngModel)]="Producto.Credito"></ion-input>
+        <ion-item>
+          <ion-label>Cuota</ion-label>
+          <ion-input type="number" placeholder="$" [(ngModel)]="Producto.Pago"
+            (ngModelChange)='CambioInfoProducto()'></ion-input>
+        </ion-item>
       </ion-col>
+
       <ion-col>
-        <ion-input type="number" placeholder="Cuota" [(ngModel)]="Producto.Pago"
-          (ngModelChange)='CambioPagoNum(Producto.Pago, Producto.Total_Pagos)'></ion-input>
+        <ion-item>
+          <ion-label>Numero de cuotas</ion-label>
+          <ion-input type="number" placeholder="#" [(ngModel)]="Producto.Total_Pagos"
+            (ngModelChange)='CambioInfoProducto()'></ion-input>
+        </ion-item>
       </ion-col>
+
+    </ion-row>
+
+    <ion-row>
       <ion-col>
-        <ion-textarea disabled readonly placeholder="Total a pagar" [(ngModel)]="Producto.Total_Credito">
-        </ion-textarea>
+        <ion-item style="max-width: 100%; width: 100%">
+          <ion-label>Periodo</ion-label>
+          <ion-select [(ngModel)]="Producto.Periodo">
+            <ion-select-option value="{{ gv.diario }}">Diario</ion-select-option>
+            <ion-select-option value="{{ gv.semanal }}">Semanal</ion-select-option>
+            <ion-select-option value="{{ gv.quincenal }}">Quincenal</ion-select-option>
+            <ion-select-option value="{{ gv.mensual }}">Mensual</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+
+      <ion-col>
+        <ion-item>
+        <ion-label>Entrega de efectivo</ion-label>
+        <ion-input type="number" placeholder="$" [(ngModel)]="Producto.Efectivo"
+        (ngModelChange)='CambioInfoProducto()'></ion-input>
+      </ion-item>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <ion-input type="number" placeholder="Numero de cuotas" [(ngModel)]="Producto.Total_Pagos"
-          (ngModelChange)='CambioPagoNum(Producto.Pago, Producto.Total_Pagos)'></ion-input>
+        <ion-label>Total a pagar</ion-label>
+        <ion-textarea disabled readonly placeholder="Total a pagar" [(ngModel)]="Producto.Total_Credito">
+        </ion-textarea>
       </ion-col>
       <ion-col>
-        <ion-input type="number" placeholder="Entrega de efectivo" [(ngModel)]="Producto.Efectivo"></ion-input>
+        <ion-label>Cargo por servicio</ion-label>
+        <ion-textarea disabled readonly placeholder="Cargo" [(ngModel)]="Producto.Cargo">
+        </ion-textarea>
       </ion-col>
-      <ion-item>
-        <ion-label>Periodo</ion-label>
-        <ion-select [(ngModel)]="Producto.Periodo">
-          <ion-select-option value="{{ gv.diario }}">Diario</ion-select-option>
-          <ion-select-option value="{{ gv.semanal }}">Semanal</ion-select-option>
-          <ion-select-option value="{{ gv.quincenal }}">Quincenal</ion-select-option>
-          <ion-select-option value="{{ gv.mensual }}">Mensual</ion-select-option>
-        </ion-select>
-      </ion-item>
+      <ion-col>
+        <ion-label>Utilidad por cuota</ion-label>
+        <ion-textarea disabled readonly placeholder="Utilidad/cuota" [(ngModel)]="Producto.UtilidadCuota">
+        </ion-textarea>
+      </ion-col>
     </ion-row>
 
     <ion-row>

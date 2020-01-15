@@ -10,51 +10,58 @@
 </ion-header>
 
 <ion-content>
+  <input type="file" (change)="uploadFile($event)">
+  
+  <ion-img src="{{ img }}"></ion-img>
 
-    <ion-row>
-      <ion-col>
-        <ion-input placeholder="Nombre" [(ngModel)]="Usuario.Nombre">
-        </ion-input>
-      </ion-col>
-    </ion-row>
+  <ion-row>
+    <ion-col>
+      <ion-input placeholder="Nombre" [(ngModel)]="Usuario.Nombre">
+      </ion-input>
+    </ion-col>
+  </ion-row>
 
-    <ion-row>
-      <ion-col>
-        <ion-input placeholder="Mail" [(ngModel)]="Usuario.Mail">
-        </ion-input>
-      </ion-col>
-      <ion-col>
-        <ion-input placeholder="Etiqueta" [(ngModel)]="Usuario.Etiqueta">
-        </ion-input>
-      </ion-col>
-    </ion-row>
+  <ion-row>
+    <ion-col>
+      <ion-input placeholder="Mail" [(ngModel)]="Usuario.Mail">
+      </ion-input>
+    </ion-col>
+  </ion-row>
 
-    <ion-row>
-      <ion-col>
-        <ion-input placeholder="Nombre de la organizacion" [(ngModel)]="Usuario.Organizacion">
-        </ion-input>
-      </ion-col>
-    </ion-row>
+  <ion-row>
+    <ion-col>
+      <ion-input type="password" placeholder="Contraseña" [(ngModel)]="Usuario.Contrasena">
+      </ion-input>
+    </ion-col>
+    <ion-col>
+      <ion-input type="password" placeholder="Confirmar contraseña" [(ngModel)]="Usuario.Confirmar">
+      </ion-input>
+    </ion-col>
+  </ion-row>
 
-    <ion-row>
-      <ion-col>
-        <ion-input type="password" placeholder="Contraseña" [(ngModel)]="Usuario.Contrasena">
-        </ion-input>
-      </ion-col>
-      <ion-col>
-        <ion-input type="password" placeholder="Confirmar contraseña" [(ngModel)]="Usuario.Confirmar">
-        </ion-input>
-      </ion-col>
-    </ion-row>
+  <ion-row>
+    <ion-col>
+      <ion-input placeholder="Nombre o razon social" [(ngModel)]="Usuario.Organizacion">
+      </ion-input>
+    </ion-col>
+    <ion-col>
+      <ion-input placeholder="Nombre comercial" [(ngModel)]="Usuario.Comercial">
+      </ion-input>
+    </ion-col>
+    <ion-col>
+      <ion-input placeholder="RFC" [(ngModel)]="Usuario.RFC">
+      </ion-input>
+    </ion-col>
+  </ion-row>
 
-    <ion-row>
-      <ion-col>
-        <ion-button (click)="AgregarFinanciera()">Agregar</ion-button>
-      </ion-col>
+  <ion-row>
+    <ion-col>
+      <ion-button (click)="AgregarFinanciera()">Agregar</ion-button>
+    </ion-col>
 
-      <ion-col *ngIf='Usuario.Incomplete'>
-        <ion-text>{{ Usuario.AlertText }}</ion-text>
-      </ion-col>
-    </ion-row>
+    <ion-col *ngIf='Usuario.Incomplete'>
+      <ion-text>{{ Usuario.AlertText }}</ion-text>
+    </ion-col>
+  </ion-row>
 
 </ion-content>

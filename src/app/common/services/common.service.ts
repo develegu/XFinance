@@ -1,11 +1,13 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AlertController, MenuController, ToastController, Platform } from '@ionic/angular';
+import { AlertController, MenuController, ToastController, ActionSheetController, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { gv } from '../constants';
 import { Storage } from '@ionic/storage';
 import * as firebase from 'firebase';
 import { Response } from 'selenium-webdriver/http';
+//import { Camera, PictureSourceType, CameraOptions } from '@ionic-native/Camera/ngx';
+
 
 @Injectable()
 
@@ -17,9 +19,169 @@ export class CommonService {
         public router: Router,
         private toastController: ToastController,
         public localStorage: Storage,
-        public plt: Platform) {
+        // private camera: Camera,
+
+        public plt: Platform,
+        private actionSheetController: ActionSheetController,
+    ) {
 
     }
+
+    //________________________________________________________TOMAR FOTOS______________________________________
+    /*
+    
+    async image_upload() {
+        const actionSheet = await this.actionSheetController.create({
+          header: "Select Image source",
+          buttons: [
+          {
+            text: 'Use Camera',
+            handler: () => {
+              this.takePicture(this.camera.PictureSourceType.CAMERA);
+            }
+          },
+          {
+            text: 'Cancel',
+            role: 'cancel'
+          }
+          ]
+        });
+        await actionSheet.present();
+      }
+    
+      takePicture(sourceType: PictureSourceType) {
+        var options: CameraOptions = {
+          quality: 100,
+          sourceType: sourceType,
+          saveToPhotoAlbum: true,
+          correctOrientation: true
+        };
+    
+        this.camera.getPicture(options).then(imagePath => {
+          if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
+            this.filepath.resolveNativePath(imagePath)
+              .then(filePath => {
+                let correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
+                let currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
+                this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
+              });
+          } else {
+            var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
+            var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
+            this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
+          }
+        });
+      }
+    
+      copyFileToLocalDir(namePath, currentName, newFileName) {
+        let options = {
+          uri: namePath + '/' + currentName,
+          folderName: 'Hollo Resize Images',
+          quality: 90,
+          width: 300,
+          height: 300
+        } as ImageResizerOptions;
+    
+        this.imageResizer.resize(options)
+          .then((filePath: string) => { this.updateStoredImages(this.get_filename_from_path(filePath), filePath); })
+          .catch(e => alert(e));
+      }
+    
+      updateStoredImages(name, path) {
+        this.storage.get(STORAGE_KEY).then(images => {
+          let arr = JSON.parse(images);
+          if (!arr) {
+            let newImages = [name];
+            this.storage.set(STORAGE_KEY, JSON.stringify(newImages));
+          } else {
+            arr.push(name);
+            this.storage.set(STORAGE_KEY, JSON.stringify(arr));
+          }
+    
+          let filePath = path;
+          let resPath = this.pathForImage(filePath);
+    
+          let newEntry = {
+            name: name,
+            path: resPath,
+            filePath: filePath
+          };
+    
+          this.saved_image = resPath;
+    
+          this.local_images = [newEntry, ...this.local_images];
+          this.ref.detectChanges(); // trigger change detection cycle
+          this.startUpload(newEntry)
+        });
+      }
+    
+      startUpload(imgEntry) {
+        this.file.resolveLocalFilesystemUrl(imgEntry.filePath)
+          .then(entry => {
+            (<FileEntry>entry).file(file => this.readFile(file))
+          })
+          .catch(err => {
+            this.Toast('Error while reading file.', 2000);
+          });
+      }
+    
+      readFile(file: any) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const imgBlob = new Blob([reader.result], {
+            type: file.type
+          });
+    
+          let data = {
+            img: imgBlob,
+            name: file.name
+          }
+    
+          this.image_to_upload = data.img;
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    
+      loadStoredImages() {
+        this.storage.get(STORAGE_KEY).then(images => {
+          if (images) {
+            let arr = JSON.parse(images);
+            this.local_images = [];
+            for (let img of arr) {
+              let filePath = this.file.dataDirectory + img;
+              let resPath = this.pathForImage(filePath);
+              this.local_images.push({ name: img, path: resPath, filePath: filePath });
+            }
+            this.saved_image = this.local_images[0].filePath;
+            // alert(this.local_images[0].filePath);
+          }
+        });
+      }
+    
+      pathForImage(img) {
+        if (img === null) {
+          return '';
+        } else {
+          let converted = this.webview.convertFileSrc(img);
+          return converted;
+        }
+      }
+    
+      createFileName() {
+        var d = new Date(),
+          n = d.getTime(),
+          newFileName = n + ".jpg";
+        return newFileName;
+      }
+    
+      get_filename_from_path(path) {
+        return path.split('\\').pop().split('/').pop();
+      }
+
+      //*/
+    //___________________________________________________________________________________________________________________________
+
+
 
     //----------------------------------------------------------Collaborador
     CrearCollaborador(Name: string, Password: string, mail: string, organizacion: string,
@@ -34,8 +196,8 @@ export class CommonService {
                     [gv.ID_Ubicacion]: ID,
                     [gv.tag]: Etiqueta,
                 }).then((res) => {
-                    console.log("res")
-                    console.log(res)
+                    console.log("res");
+                    console.log(res);
 
                     if (!firebase.auth().currentUser.emailVerified) {
                         console.log("send mail")
@@ -45,14 +207,23 @@ export class CommonService {
                             resolve(data.user.uid);
                         }).catch((err) => {
                             console.log("err at mail sent")
-                            reject(err);
+                            reject(false);
                         });
                     }
                 });
             }).catch((err) => {
+                if (err = "auth/email-already-in-use") {
+                    this.Toast("Ya hay un usuario con ese mail", 3000);
+                } else
+                    if (err = "auth/invalid-email") {
+                        this.Toast("El email no es valido", 3000);
+                    } else
+                        if (err = "auth/weak-password") {
+                            this.Toast("La contraseña es muy debil", 3000);
+                        }
                 console.log("err")
                 console.log(err)
-                reject(err);
+                reject(false);
             });
         });
     }
@@ -712,6 +883,7 @@ export class CommonService {
                 this.Toast('Producto agregado', 2000);
                 resolve(true);
             }).catch((error) => {
+                console.log(error)
                 this.Toast('Error al agregar el producto', 2000);
                 reject(false);
             });
@@ -863,10 +1035,8 @@ export class CommonService {
                 this.ListenersClientesPagos();
                 this.ListenersColaboradores();
 
-                if (gv.usuario[gv.organizacion] === undefined) {
-                    this.IrANuevaFinanciera();
-                } else
                     if (this.router.url === '/login') {
+                        this.Toast("Sesion iniciada con " + gv.usuario[gv.mail], 2000);
                         this.IrAClientes();
                     }
 
@@ -1014,11 +1184,13 @@ export class CommonService {
                 .stateChanges().subscribe(serverItems => {
                     serverItems.forEach((a, index, array) => {
                         let item: any = a.payload.doc.data(); //a.payload.doc.id;
-                        console.log("INFO " + a.payload.doc.id)
-                        console.log(item[gv.FB_Productos])
+                        console.log("INFO " + a.payload.doc.id);
+                        console.log(item);
 
                         if (a.payload.doc.id === gv.FB_Productos) {
                             const keys = Object.keys(item[gv.FB_Productos])
+                            gv.ArrProductos = [];
+
                             for (let key of keys) {
                                 console.log("producto")
                                 console.log(item[gv.FB_Productos][key])
@@ -1038,7 +1210,13 @@ export class CommonService {
                                     gv.ArrBancos.push(item[gv.FB_Banco][key])
                                 }
 
-                            }
+                            } else
+                                if (a.payload.doc.id === gv.dueno) {
+                                    gv.ArrInfo = item;
+                                    console.log("ArrInfo")
+                                    console.log(gv.ArrInfo)
+
+                                }
 
                     });
 
@@ -1048,12 +1226,13 @@ export class CommonService {
 
     ColaboradoresSubscribe;
     ListenersColaboradores() {
-        if (this.ColaboradoresSubscribe === undefined) {
+        if (this.ColaboradoresSubscribe === undefined && gv.usuario[gv.organizacion] !== undefined) {
             gv.colaboradores = [];
 
             this.ColaboradoresSubscribe = this.db.collection(gv.FB_Usuarios,
                 ref => ref.where(gv.ID_Ubicacion, '>=', this.GetRangoDeID(gv.usuario[gv.ID_Ubicacion])[0])
                     .where(gv.ID_Ubicacion, '<=', this.GetRangoDeID(gv.usuario[gv.ID_Ubicacion])[1])
+                    .where(gv.organizacion, '==', gv.usuario[gv.organizacion])
             ).stateChanges().subscribe(serverItems => {
                 if (serverItems.length == 0) {
                     console.log("No hay usuarios");
@@ -1228,4 +1407,7 @@ export class CommonService {
         console.log(cred)
         return firebase.auth().signInWithEmailAndPassword(cred.email, cred.password);
     }
+
+
+
 }

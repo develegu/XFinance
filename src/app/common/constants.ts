@@ -33,6 +33,8 @@ export const gv = {
     modificado_por: 'mod_por',
     dueno: 'Dueno', region: 'Region', zona: 'Zona', sucursal: 'Sucursal', dm: 'Supervisor', agente: 'Agente',
     tag: 'tag',
+    RFC: 'RFC',
+    Nombre_Comercial: 'nom_com',
 
     //INFO CREDITOS
     pagos_Arr: [],
@@ -70,6 +72,7 @@ export const gv = {
     colaboradores: [],
     roll: 'roll', Administrador: 'admin', Cobrador: 'cob', Oficina: 'off', Dueno: 'duen',
     ArrBancos: [],
+    ArrInfo: [],
 
 
     ArrProductos: [],

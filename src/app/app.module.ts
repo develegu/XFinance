@@ -17,6 +17,7 @@ import { CommonService } from './common/services/common.service';
 import { AuthManagerService } from './common/services/auth-manager.service';
 import { IonicStorageModule } from '@ionic/storage';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { AngularFireStorageModule } from '@angular/fire/storage';
 
 @NgModule({
   declarations: [AppComponent],
@@ -30,7 +31,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     IonicModule.forRoot(),
     IonicStorageModule.forRoot(),
     AppRoutingModule,
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
+    AngularFireStorageModule
   ],
   providers: [
     CommonService,
