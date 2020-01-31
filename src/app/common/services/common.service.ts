@@ -1060,7 +1060,9 @@ export class CommonService {
     IrACreditos() {
         this.router.navigateByUrl('credit');
     }
-
+    IrAmainscreen() {
+        this.router.navigateByUrl('mainscreen');
+    }
     Clientessubscribe;
     PagosSubscribe;
     InfoSubscribe;

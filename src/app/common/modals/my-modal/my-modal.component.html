@@ -59,20 +59,21 @@
 
     <ion-row>
       <ion-col>
-        <ion-input placeholder="CURP" [(ngModel)]="Cliente.CURP">
-        </ion-input>
-      </ion-col>
-      <ion-col>
-        <ion-input placeholder="Telefono" [(ngModel)]="Cliente.Telefono">
-        </ion-input>
-      </ion-col>
-      <ion-col>
         <ion-item>
           <ion-datetime displayFormat="DD/MM/YYYY" placeholder="Fecha Nacimiento" max="2050"
             [(ngModel)]="Cliente.Cumpleanos" (ngModelChange)='GetCurp()'>
           </ion-datetime>
         </ion-item>
       </ion-col>
+      <ion-col>
+        <ion-input placeholder="Telefono" [(ngModel)]="Cliente.Telefono">
+        </ion-input>
+      </ion-col>
+      <ion-col>
+        <ion-input placeholder="CURP" [(ngModel)]="Cliente.CURP">
+        </ion-input>
+      </ion-col>
+
     </ion-row>
 
     <h3>Direccion</h3>
@@ -466,8 +467,8 @@
       <ion-col>
         <ion-item>
           <ion-label>Cuota</ion-label>
-          <ion-input type="number" placeholder="$" [(ngModel)]="Producto.Pago"
-            (ngModelChange)='CambioInfoProducto()'></ion-input>
+          <ion-input type="number" placeholder="$" [(ngModel)]="Producto.Pago" (ngModelChange)='CambioInfoProducto()'>
+          </ion-input>
         </ion-item>
       </ion-col>
 
@@ -496,10 +497,10 @@
 
       <ion-col>
         <ion-item>
-        <ion-label>Entrega de efectivo</ion-label>
-        <ion-input type="number" placeholder="$" [(ngModel)]="Producto.Efectivo"
-        (ngModelChange)='CambioInfoProducto()'></ion-input>
-      </ion-item>
+          <ion-label>Entrega de efectivo</ion-label>
+          <ion-input type="number" placeholder="$" [(ngModel)]="Producto.Efectivo"
+            (ngModelChange)='CambioInfoProducto()'></ion-input>
+        </ion-item>
       </ion-col>
     </ion-row>
 

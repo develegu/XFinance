@@ -270,6 +270,8 @@ export class CreditComponent {
           this.in.Cargo_Servicio = 0;
           gv.AvalArr = [];
           this.ArrProductos = [];
+          this.ArrGarantias = [];
+
         } else {
           this.gf.Toast('Error al registrar el credito', 2000)
         }
@@ -301,12 +303,14 @@ export class CreditComponent {
   }
 
   ProductoSeleccionado() {
-    this.in.Num_Pagos = this.ArrProductos[this.in.Producto][gv.total_pagos];
-    this.in.Credito = this.ArrProductos[this.in.Producto][gv.credito];
-    this.in.Pago = this.ArrProductos[this.in.Producto][gv.pago];
-    this.in.Total_Credito = this.ArrProductos[this.in.Producto][gv.total_credito];
-    this.in.Periodo = this.ArrProductos[this.in.Producto][gv.periodo];
-    this.in.Efectivo = this.ArrProductos[this.in.Producto][gv.efectivo];
+    if(this.ArrProductos[this.in.Producto] !== undefined){
+      this.in.Num_Pagos = this.ArrProductos[this.in.Producto][gv.total_pagos];
+      this.in.Credito = this.ArrProductos[this.in.Producto][gv.credito];
+      this.in.Pago = this.ArrProductos[this.in.Producto][gv.pago];
+      this.in.Total_Credito = this.ArrProductos[this.in.Producto][gv.total_credito];
+      this.in.Periodo = this.ArrProductos[this.in.Producto][gv.periodo];
+      this.in.Efectivo = this.ArrProductos[this.in.Producto][gv.efectivo];
+    }
   }
 
 }
