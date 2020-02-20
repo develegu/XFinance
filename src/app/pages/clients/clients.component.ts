@@ -278,6 +278,9 @@ export class ClientsComponent {
           this.Pago = '';
           this.Pago_Total = '';
 
+          this.Anio = undefined;
+          this.Mes = undefined;
+          this.Dia = undefined
         }
 
         this.Btn_Desactivado = false;

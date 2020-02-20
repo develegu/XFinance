@@ -315,7 +315,7 @@ export class MyModal {
     }
     if (this.ArrSel[gv.dm].length === 0 && this.Usuario.Roll !== gv.dm) {
       this.ArrSel[gv.dm].push({
-        [gv.nombre]: "Gerente",
+        [gv.nombre]: "Supervisor",
         [gv.dm]: 1
       })
     }
@@ -392,7 +392,7 @@ export class MyModal {
             this.Usuario.AG = 0;
 
             this.ArrSel[gv.dm].push({
-              [gv.nombre]: "Proximo gerente",
+              [gv.nombre]: "Proximo supervisor",
               [gv.dm]: proximo
             });
           } else

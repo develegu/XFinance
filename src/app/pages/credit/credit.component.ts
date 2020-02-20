@@ -18,8 +18,7 @@ export class CreditComponent {
 
   constructor(private modalController: ModalController,
     public db: AngularFirestore,
-    public gf: CommonService) {
-  }
+    public gf: CommonService) { }
 
   cliente = [];
   Alerta = false;
@@ -71,7 +70,7 @@ export class CreditComponent {
     Horario: '',
     Periodo: '',
     Deposito: '',
-    Folio: '',
+    Folio: '0',
     Producto: '',
     Cargo_Servicio: 0,
     Cargo_Pago: 0,
@@ -79,8 +78,9 @@ export class CreditComponent {
   }
 
   ngOnInit() {
+
     this.ArrProductos = gv.ArrProductos;
-    
+
     console.log(this.ArrProductos)
     this.gf.CheckLogin();
 
@@ -247,7 +247,7 @@ export class CreditComponent {
 
     this.gf.RegistratCredito(parseInt(this.in.Num_Pagos), this.cliente[gv.nombre], this.cliente[gv.key], parseInt(this.in.Credito),
       this.in.Fecha, this.in.Periodo, parseInt(this.in.Pago), this.in.IDCliente, parseInt(this.in.Efectivo),
-      this.in.Total_Credito, this.in.Deposito, this.in.Horario, this.ArrGarantias, this.in.Folio, gv.AvalArr, this.in.Razon, 
+      this.in.Total_Credito, this.in.Deposito, this.in.Horario, this.ArrGarantias, this.in.Folio, gv.AvalArr, this.in.Razon,
       this.in.Cargo_Pago, this.cliente[gv.ID_Ubicacion])
       .then(res => {
         if (res) {
@@ -268,8 +268,8 @@ export class CreditComponent {
           this.in.Cargo_Pago = 0;
           this.in.Total_Credito = 0;
           this.in.Cargo_Servicio = 0;
+          this.in.Producto = '';
           gv.AvalArr = [];
-          this.ArrProductos = [];
           this.ArrGarantias = [];
 
         } else {
@@ -293,17 +293,17 @@ export class CreditComponent {
     this.CambioCargoPorServicio();
   }
 
-  CambioCargoPorServicio(){
+  CambioCargoPorServicio() {
     if (this.in.Efectivo === '') {
       this.in.Efectivo = '0';
     }
 
     this.in.Cargo_Servicio = this.in.Total_Credito - parseInt(this.in.Efectivo);
-    this.in.Cargo_Pago = this.in.Cargo_Servicio/parseInt(this.in.Num_Pagos);
+    this.in.Cargo_Pago = this.in.Cargo_Servicio / parseInt(this.in.Num_Pagos);
   }
 
   ProductoSeleccionado() {
-    if(this.ArrProductos[this.in.Producto] !== undefined){
+    if (this.ArrProductos[this.in.Producto] !== undefined) {
       this.in.Num_Pagos = this.ArrProductos[this.in.Producto][gv.total_pagos];
       this.in.Credito = this.ArrProductos[this.in.Producto][gv.credito];
       this.in.Pago = this.ArrProductos[this.in.Producto][gv.pago];
@@ -320,22 +320,22 @@ export class CreditComponent {
 
     parseExcel = function (file) {
       var reader = new FileReader();
-  
+
       if (file !== undefined) {
         reader.onload = function (e) {
           var data = e.target.result
-  
+
           var workbook = XLSX.read(data, {
             type: 'binary'
           });
-  
+
           workbook.SheetNames.forEach(function (sheetName) {
             // Here is your object
             var XL_row_object = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
             console.log(XL_row_object)
-  
+
             for (let x = 0; x < XL_row_object.length; x++) {
-  
+
               let date = new Date('01/01/1900');
               date.setDate(date.getDate() + XL_row_object[x]['Fecha nacimiento'] - 2);
               console.log(date);
@@ -345,13 +345,18 @@ export class CreditComponent {
         reader.onerror = function (ex) {
           console.log(ex);
         };
-  
+
         reader.readAsBinaryString(file);
       }
     };
-  
+
     handleFileSelect(evt) {
       var files = evt.target.files; // FileList object
       this.parseExcel(files[0]);
     }
     */
+
+
+
+
+

@@ -6,6 +6,11 @@
     <ion-title>
       Administrador
     </ion-title>
+
+    <ion-title style="float: right;">
+      {{ gv.usuario[gv.nombre] }}
+    </ion-title>
+
   </ion-toolbar>
 </ion-header>
 
@@ -18,18 +23,16 @@
 
   <ion-row *ngFor="let user of gv.colaboradores">
     <ion-col (click)="ModificarUsuarioModal(user)">
-      {{ user[gv.nombre] }}
-    </ion-col>
-    <ion-col>
-      {{ user[gv.roll] }}
-    </ion-col>
-    <ion-col>
-      {{ user[gv.tag] }}
+      {{ user[gv.nombre] }} 
     </ion-col>
     <ion-col>
       {{ this.gf.GetElementosDeID(user[gv.ID_Ubicacion])[gv.ID_Ubicacion] }}
       ({{ this.gf.GetElementosDeID(user[gv.ID_Ubicacion])[this.gf.GetElementosDeID(user[gv.ID_Ubicacion])[gv.ID_Ubicacion]] }})
     </ion-col>
+    <ion-col>
+      {{ user[gv.tag] }}
+    </ion-col>
+
 
     <ion-col>
       <ion-icon color="medium" name="close-circle-outline">

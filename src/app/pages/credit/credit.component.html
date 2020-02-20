@@ -6,6 +6,9 @@
     <ion-title>
       Credito
     </ion-title>
+    <ion-title style="float: right;">
+      {{ gv.usuario[gv.nombre] }}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -29,7 +32,7 @@
       <ion-col col-6>
         <ion-item class="input">
           <ion-label floating>*Folio:</ion-label>
-          <ion-input [(ngModel)]="in.Folio"></ion-input>
+          <ion-input disabled="true" [(ngModel)]="in.Folio"></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>

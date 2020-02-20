@@ -1054,6 +1054,9 @@ export class CommonService {
     IrAClientes() {
         this.router.navigateByUrl('clients');
     }
+    IrAAdmin() {
+        this.router.navigateByUrl('admin');
+    }
     IrANuevaFinanciera() {
         this.router.navigateByUrl('newfinance');
     }
@@ -1410,6 +1413,24 @@ export class CommonService {
         return firebase.auth().signInWithEmailAndPassword(cred.email, cred.password);
     }
 
+    /*/GENERAL
+    ActualizarGeneral(Path, Info) {
+        return new Promise<any>((resolve, reject) => {
+            this.db.collection(gv.FBPATH_General).doc(Path).set({
+                [Path]: firebase.firestore.FieldValue.arrayUnion(Info)
+            },
+                { merge: true }
+            ).then((res) => {
+                console.log(res);
+                resolve(true);
 
+            }).catch(err => {
+                console.log(err);
+                reject(false);
+
+            });
+        });
+    }
+    */
 
 }
